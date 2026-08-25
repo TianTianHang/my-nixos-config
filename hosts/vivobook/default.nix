@@ -2,9 +2,14 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/boot.nix
-    ../../modules/networking.nix
+    ../../modules/btrfs.nix
     ../../modules/desktop.nix
-    ../../modules/system.nix
+    ../../modules/greeter.nix
+    ../../modules/input-method.nix
+    ../../modules/localization.nix
+    ../../modules/networking.nix
+    ../../modules/nix.nix
+    ../../modules/packages.nix
     ../../modules/user.nix
   ];
 

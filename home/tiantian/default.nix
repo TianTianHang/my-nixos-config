@@ -1,4 +1,4 @@
-{config, pkgs, ...}: {
+{
   home.username = "tiantian";
   home.homeDirectory = "/home/tiantian";
 
@@ -6,21 +6,12 @@
 
   programs.home-manager.enable = true;
 
-  home.packages = with pkgs; [
-    tree
-    git
+  imports = [
+    ./packages.nix
+    ./git.nix
+    ./bash.nix
+    ./niri.nix
+    ./noctalia.nix
+    ./portals.nix
   ];
-
-  programs.git = {
-    enable = true;
-    settings.user = {
-      name = "TianTianHang";
-      email = "a2450804878@hotmial.com";
-    };
-  };
-
-  programs.bash = {
-    enable = true;
-    enableCompletion = true;
-  };
 }
