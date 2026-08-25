@@ -1,8 +1,20 @@
 {
   description = "Modular NixOS configuration for vivobook";
 
+  # 镜像配置仅影响构建 flake 时的下载（nix 命令本身）
+  nixConfig = {
+    substituters = [
+      "https://mirror.sjtu.edu.cn/nix-channels/store"
+      "https://cache.nixos.org"
+    ];
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+    ];
+  };
+
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # 使用南京大学 Git 镜像加速 nixpkgs 源码下载
+    nixpkgs.url = "git+https://mirror.nju.edu.cn/git/nixpkgs.git?ref=nixos-unstable&shallow=1";
 
     home-manager = {
       url = "github:nix-community/home-manager/master";
