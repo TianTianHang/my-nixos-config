@@ -7,42 +7,42 @@
   # 只保留 GDM + gnome-shell 核心，剔除捆绑的游戏与可选应用
   environment.gnome.excludePackages = with pkgs; [
     # 游戏
-    gnome.gnome-chess
-    gnome.iagno
-    gnome.five-or-more
-    gnome.four-in-a-row
-    gnome.gnome-klotski
-    gnome.gnome-mahjongg
-    gnome.gnome-mines
-    gnome.gnome-nibbles
-    gnome.gnome-robots
-    gnome.gnome-sudoku
-    gnome.gnome-taquin
-    gnome.gnome-tetravex
-    gnome.swell-foop
-    gnome.aisleriot
+    gnome-chess
+    iagno
+    five-or-more
+    four-in-a-row
+    gnome-klotski
+    gnome-mahjongg
+    gnome-mines
+    gnome-nibbles
+    gnome-robots
+    gnome-sudoku
+    gnome-taquin
+    gnome-tetravex
+    swell-foop
+    aisleriot
     # 可选/冗余应用
-    gnome.cheese
-    gnome.gnome-maps
+    cheese
+    gnome-maps
     gnome-photos
     gnome-tour
-    gnome.gnome-weather
-    gnome.gnome-music
-    gnome.gnome-contacts
-    gnome.gnome-clocks
-    gnome.gnome-todo
-    gnome.gnome-logs
-    gnome.epiphany
+    gnome-weather
+    gnome-music
+    gnome-contacts
+    gnome-clocks
+    endeavour
+    gnome-logs
+    epiphany
     rhythmbox
-    gnome.totem
-    gnome.simple-scan
-    gnome.baobab
+    totem
+    simple-scan
+    baobab
     evolution
     gnome-user-docs
-    gnome.yelp
+    yelp
     gnome-text-editor
     gnome-connections
-    gnome.gnome-boxes
+    gnome-boxes
   ];
 
   environment.systemPackages = with pkgs; [
