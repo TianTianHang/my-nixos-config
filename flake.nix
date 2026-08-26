@@ -18,7 +18,10 @@
     noctalia.url = "github:noctalia-dev/noctalia/cachix";
 
     # noctalia-greeter：greetd 登录界面（追新，本地构建）
-    noctalia-greeter.url = "github:noctalia-dev/noctalia-greeter";
+    noctalia-greeter = {
+      url = "github:noctalia-dev/noctalia-greeter";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # niri 的 NixOS/Home Manager 模块与上游构建的包（追新）。
     # 注意：不能写 inputs.nixpkgs.follows——它依赖的库版本随其锁定的
