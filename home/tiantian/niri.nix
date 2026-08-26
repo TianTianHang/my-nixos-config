@@ -1,7 +1,5 @@
 {pkgs, ...}: {
   programs.niri = {
-    enable = true;
-
     # 直接书写 KDL，由 niri-flake 在构建时用 `niri validate` 校验。
     # 参考 https://docs.noctalia.dev/noctalia/compositor-settings/niri/
     config = ''
@@ -37,10 +35,47 @@
 
       binds {
         // 核心 Noctalia 绑定
-        Mod+Space { spawn-sh "noctalia msg panel-toggle launcher"; }
+        Mod+D { spawn-sh "noctalia msg panel-toggle launcher"; }
         Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
         Mod+Comma { spawn-sh "noctalia msg settings-toggle"; }
         Alt+Tab { spawn-sh "noctalia msg window-switcher"; }
+
+        // 启动终端
+        Mod+T { spawn "ghostty"; }
+
+        // 窗口操作
+        Mod+Q { close-window; }
+        Mod+F { fullscreen-window; }
+        Mod+Shift+F { toggle-column-tabbed-display; }
+        Mod+C { center-column; }
+
+        // 聚焦窗口（HJKL 与方向键）
+        Mod+H { focus-column-left; }
+        Mod+L { focus-column-right; }
+        Mod+J { focus-window-down; }
+        Mod+K { focus-window-up; }
+        Mod+Left { focus-column-or-monitor-left; }
+        Mod+Right { focus-column-or-monitor-right; }
+        Mod+Up { focus-window-or-monitor-up; }
+        Mod+Down { focus-window-or-monitor-down; }
+
+        // 移动窗口 / 列
+        Mod+Shift+H { move-column-left; }
+        Mod+Shift+L { move-column-right; }
+        Mod+Shift+J { move-window-down; }
+        Mod+Shift+K { move-window-up; }
+        Mod+Shift+Left { move-column-left-or-to-monitor-left; }
+        Mod+Shift+Right { move-column-right-or-to-monitor-right; }
+        Mod+Shift+Up { move-window-up-or-to-workspace-up; }
+        Mod+Shift+Down { move-window-down-or-to-workspace-down; }
+
+        // 将窗口并入 / 移出列（标签页）
+        Mod+BracketLeft { consume-window-into-column; }
+        Mod+BracketRight { expel-window-from-column; }
+
+        // 交换相邻窗口
+        Mod+Shift+U { swap-window-left; }
+        Mod+Shift+I { swap-window-right; }
 
         // 音量 / 亮度
         XF86AudioRaiseVolume { spawn-sh "noctalia msg volume-up"; }
