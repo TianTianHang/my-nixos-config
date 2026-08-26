@@ -6,6 +6,9 @@
       // 启动 Noctalia 桌面壳
       spawn-at-startup "noctalia"
 
+      // 屏幕键盘：注册为输入法客户端，文本输入聚焦时由 niri 唤起
+      spawn-at-startup "squeekboard"
+
       // 触控板：轻点即点击（tap-to-click）与自然滚动
       input {
         touchpad {
@@ -77,12 +80,22 @@
         Mod+Shift+U { swap-window-left; }
         Mod+Shift+I { swap-window-right; }
 
+        // 屏幕键盘手动开关（无键盘时通常自动弹出，这里用于手动切换）
+        Mod+O { spawn-sh "V=$(busctl get-property --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 Visible 2>/dev/null); if [ \"$V\" = \"b true\" ]; then busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false; else busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true; fi"; }
+
         // 音量 / 亮度
         XF86AudioRaiseVolume { spawn-sh "noctalia msg volume-up"; }
         XF86AudioLowerVolume { spawn-sh "noctalia msg volume-down"; }
         XF86AudioMute { spawn-sh "noctalia msg volume-mute"; }
         XF86MonBrightnessUp { spawn-sh "noctalia msg brightness-up"; }
         XF86MonBrightnessDown { spawn-sh "noctalia msg brightness-down"; }
+      }
+
+      // 二合一设备：进入平板模式（物理键盘不可用）时启用屏幕键盘，
+      // 退出时关闭。squeekboard 会在文本输入聚焦时自动弹出。
+      switch-events {
+        tablet-mode-on { spawn "bash" "-c" "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true"; }
+        tablet-mode-off { spawn "bash" "-c" "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled false"; }
       }
 
       // 将 Noctalia 的模糊壁纸层放入 overview 背景（需 noctalia backdrop 启用）
