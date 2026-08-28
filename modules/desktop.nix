@@ -3,13 +3,10 @@
     ghostty
     nautilus
 
-    # 屏幕键盘（2-in-1 / 触屏设备）：作为 Wayland 输入法客户端，
-    # 文本输入聚焦且 screen-keyboard-enabled=true 时自动弹出
-    squeekboard
-    # 提供 org.gnome.desktop.a11y.applications 的 GSettings schema，
-    # 供 squeekboard 读取 screen-keyboard-enabled 开关
-    gsettings-desktop-schemas
-    # 用于 switch-events 切换上述开关
+    # 屏幕键盘（2-in-1 / 触屏设备）：wvkbd 走 wl_virtual_keyboard 协议，
+    # 不抢占 input-method 角色，可与 fcitx5 共存
+    wvkbd
+    # 供 home 配置写 dconf 值（dconf.settings）
     dconf
   ];
 

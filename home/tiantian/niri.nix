@@ -6,8 +6,8 @@
       // 启动 Noctalia 桌面壳
       spawn-at-startup "noctalia"
 
-      // 屏幕键盘：注册为输入法客户端，文本输入聚焦时由 niri 唤起
-      spawn-at-startup "squeekboard"
+      // 启动 fcitx5 输入法框架（提供 Rime 等输入法；Wayland 前端由模块启用）
+      spawn-at-startup "fcitx5"
 
       // 触控板：轻点即点击（tap-to-click）与自然滚动
       input {
@@ -15,6 +15,12 @@
           tap
           natural-scroll
         }
+        touch {
+          // off
+          map-to-output "eDP-1"
+          // calibration-matrix 1.0 0.0 0.0 0.0 1.0 0.0
+        }
+
       }
 
       // 圆角窗口并裁剪内容到圆角边界
@@ -35,6 +41,15 @@
         // 允许 Noctalia 的通知操作与窗口激活
         honor-xdg-activation-with-invalid-serial
       }
+      hotkey-overlay {
+        skip-at-startup
+      }
+      // 禁用热区。
+      gestures {
+        hot-corners {
+          off
+        }
+      }
 
       binds {
         // 核心 Noctalia 绑定
@@ -46,12 +61,17 @@
         // 启动终端
         Mod+T { spawn "ghostty"; }
 
+        // 手动唤起屏幕键盘（wvkbd）
+        Mod+O { spawn "wvkbd-mob"; }
+
         // 窗口操作
         Mod+Q { close-window; }
-        Mod+F { fullscreen-window; }
-        Mod+Shift+F { toggle-column-tabbed-display; }
+        Mod+F { maximize-column; }
+        Mod+M { maximize-window-to-edges; }
+        Mod+Shift+F { fullscreen-window; }
         Mod+C { center-column; }
-
+        Mod+Tab { toggle-overview; }
+      
         // 聚焦窗口（HJKL 与方向键）
         Mod+H { focus-column-left; }
         Mod+L { focus-column-right; }
@@ -80,9 +100,6 @@
         Mod+Shift+U { swap-window-left; }
         Mod+Shift+I { swap-window-right; }
 
-        // 屏幕键盘手动开关（无键盘时通常自动弹出，这里用于手动切换）
-        Mod+O { spawn-sh "V=$(busctl get-property --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 Visible 2>/dev/null); if [ \"$V\" = \"b true\" ]; then busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false; else busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true; fi"; }
-
         // 音量 / 亮度
         XF86AudioRaiseVolume { spawn-sh "noctalia msg volume-up"; }
         XF86AudioLowerVolume { spawn-sh "noctalia msg volume-down"; }
@@ -91,11 +108,11 @@
         XF86MonBrightnessDown { spawn-sh "noctalia msg brightness-down"; }
       }
 
-      // 二合一设备：进入平板模式（物理键盘不可用）时启用屏幕键盘，
-      // 退出时关闭。squeekboard 会在文本输入聚焦时自动弹出。
+      // 二合一设备：进入平板模式（物理键盘不可用）时拉起屏幕键盘，
+      // 退出时关闭。wvkbd 不自动弹出，故由平板模式事件显式控制。
       switch-events {
-        tablet-mode-on { spawn "bash" "-c" "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true"; }
-        tablet-mode-off { spawn "bash" "-c" "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled false"; }
+        tablet-mode-on { spawn "wvkbd-mob"; }
+        tablet-mode-off { spawn "pkill" "-x" "wvkbd-mob"; }
       }
 
       // 将 Noctalia 的模糊壁纸层放入 overview 背景（需 noctalia backdrop 启用）
@@ -106,7 +123,7 @@
 
       // 模糊效果（需 niri >= 26.04，由 niri-unstable 提供）
       blur {
-        passes 2
+        passes 2 
         offset 3.0
         noise 0.03
         saturation 1.0
