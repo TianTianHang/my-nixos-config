@@ -9,6 +9,10 @@
       // 启动 fcitx5 输入法框架（提供 Rime 等输入法；Wayland 前端由模块启用）
       spawn-at-startup "fcitx5"
 
+      // 屏幕键盘：wvkbd 走虚拟键盘协议，不与 fcitx5 抢 input-method 角色。
+      // 用 wvkbdctl 以 --hidden 常驻后台，靠信号显隐（见 modules/wvkbd.nix）。
+      spawn-at-startup "wvkbdctl" "start"
+
       // 触控板：轻点即点击（tap-to-click）与自然滚动
       input {
         touchpad {
@@ -61,8 +65,8 @@
         // 启动终端
         Mod+T { spawn "ghostty"; }
 
-        // 手动唤起屏幕键盘（wvkbd）
-        Mod+O { spawn "wvkbd-mob"; }
+        // 手动切换屏幕键盘显隐（wvkbdctl toggle：发 SIGRTMIN，进程不存在则拉起）
+        Mod+O { spawn "wvkbdctl" "toggle"; }
 
         // 窗口操作
         Mod+Q { close-window; }
@@ -108,11 +112,11 @@
         XF86MonBrightnessDown { spawn-sh "noctalia msg brightness-down"; }
       }
 
-      // 二合一设备：进入平板模式（物理键盘不可用）时拉起屏幕键盘，
-      // 退出时关闭。wvkbd 不自动弹出，故由平板模式事件显式控制。
+      // 二合一设备：进入平板模式（物理键盘不可用）时显示屏幕键盘，
+      // 退出时隐藏。wvkbd 不自动弹出，故由平板模式事件显式控制（信号显隐，不 kill）。
       switch-events {
-        tablet-mode-on { spawn "wvkbd-mob"; }
-        tablet-mode-off { spawn "pkill" "-x" "wvkbd-mob"; }
+        tablet-mode-on { spawn "wvkbdctl" "show"; }
+        tablet-mode-off { spawn "wvkbdctl" "hide"; }
       }
 
       // 将 Noctalia 的模糊壁纸层放入 overview 背景（需 noctalia backdrop 启用）

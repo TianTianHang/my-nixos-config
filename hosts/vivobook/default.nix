@@ -11,6 +11,7 @@
     ../../modules/nix.nix
     ../../modules/packages.nix
     ../../modules/user.nix
+    ../../modules/wvkbd.nix
   ];
 
   networking.hostName = "vivobook";
