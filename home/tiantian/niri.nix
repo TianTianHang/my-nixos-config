@@ -1,162 +1,164 @@
 {pkgs, ...}: {
-  programs.niri = {
-    # 直接书写 KDL，由 niri-flake 在构建时用 `niri validate` 校验。
-    # 参考 https://docs.noctalia.dev/noctalia/compositor-settings/niri/
-    config = ''
-      // 启动 Noctalia 桌面壳
-      spawn-at-startup "noctalia"
+  # 直接以 home-manager 管理 niri 的配置文件（不再依赖 niri-flake）。
+  # 配置原样写入 ~/.config/niri/config.kdl，由 niri 在启动时自行解析 / 校验。
+  home.packages = with pkgs; [
+    niri
+  ];
 
-      // 启动 fcitx5 输入法框架（提供 Rime 等输入法；Wayland 前端由模块启用）
-      spawn-at-startup "fcitx5"
+  xdg.configFile."niri/config.kdl".text = ''
+    // 启动 Noctalia 桌面壳
+    spawn-at-startup "noctalia"
 
-      // 屏幕键盘：wvkbd 走虚拟键盘协议，不与 fcitx5 抢 input-method 角色。
-      // 用 wvkbdctl 以 --hidden 常驻后台，靠信号显隐（见 modules/wvkbd.nix）。
-      spawn-at-startup "wvkbdctl" "start"
+    // 启动 fcitx5 输入法框架（提供 Rime 等输入法；Wayland 前端由模块启用）
+    spawn-at-startup "fcitx5"
 
-      // 触控板：轻点即点击（tap-to-click）与自然滚动
-      input {
-        touchpad {
-          tap
-          natural-scroll
-        }
-        touch {
-          // off
-          map-to-output "eDP-1"
-          // calibration-matrix 1.0 0.0 0.0 0.0 1.0 0.0
-        }
+    // 屏幕键盘：wvkbd 走虚拟键盘协议，不与 fcitx5 抢 input-method 角色。
+    // 用 wvkbdctl 以 --hidden 常驻后台，靠信号显隐（见 modules/wvkbd.nix）。
+    spawn-at-startup "wvkbdctl" "start"
 
+    // 触控板：轻点即点击（tap-to-click）与自然滚动
+    input {
+      touchpad {
+        tap
+        natural-scroll
+      }
+      touch {
+        // off
+        map-to-output "eDP-1"
+        // calibration-matrix 1.0 0.0 0.0 0.0 1.0 0.0
       }
 
-      // 圆角窗口并裁剪内容到圆角边界
-      window-rule {
-        geometry-corner-radius 20
-        clip-to-geometry true
+    }
+
+    // 圆角窗口并裁剪内容到圆角边界
+    window-rule {
+      geometry-corner-radius 20
+      clip-to-geometry true
+    }
+
+    // 让 Noctalia 设置窗口以浮动层打开，固定尺寸方便操作
+    window-rule {
+      match app-id="dev.noctalia.Noctalia"
+      open-floating true
+      default-column-width { fixed 1080; }
+      default-window-height { fixed 920; }
+    }
+
+    debug {
+      // 允许 Noctalia 的通知操作与窗口激活
+      honor-xdg-activation-with-invalid-serial
+    }
+    hotkey-overlay {
+      skip-at-startup
+    }
+    // 禁用热区。
+    gestures {
+      hot-corners {
+        off
       }
+    }
 
-      // 让 Noctalia 设置窗口以浮动层打开，固定尺寸方便操作
-      window-rule {
-        match app-id="dev.noctalia.Noctalia"
-        open-floating true
-        default-column-width { fixed 1080; }
-        default-window-height { fixed 920; }
+    binds {
+      // 核心 Noctalia 绑定
+      Mod+D { spawn-sh "noctalia msg panel-toggle launcher"; }
+      Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
+      Mod+Comma { spawn-sh "noctalia msg settings-toggle"; }
+      Alt+Tab { spawn-sh "noctalia msg window-switcher"; }
+
+      // 启动终端
+      Mod+T { spawn "ghostty"; }
+
+      // 手动切换屏幕键盘显隐（wvkbdctl toggle：发 SIGRTMIN，进程不存在则拉起）
+      Mod+O { spawn "wvkbdctl" "toggle"; }
+
+      // 窗口操作
+      Mod+Q { close-window; }
+      Mod+F { maximize-column; }
+      Mod+M { maximize-window-to-edges; }
+      Mod+Shift+F { fullscreen-window; }
+      Mod+C { center-column; }
+      Mod+Tab { toggle-overview; }
+
+      // 聚焦窗口（HJKL 与方向键）
+      Mod+H { focus-column-left; }
+      Mod+L { focus-column-right; }
+      Mod+J { focus-window-down; }
+      Mod+K { focus-window-up; }
+      Mod+Left { focus-column-or-monitor-left; }
+      Mod+Right { focus-column-or-monitor-right; }
+      Mod+Up { focus-window-or-monitor-up; }
+      Mod+Down { focus-window-or-monitor-down; }
+
+      // 移动窗口 / 列
+      Mod+Shift+H { move-column-left; }
+      Mod+Shift+L { move-column-right; }
+      Mod+Shift+J { move-window-down; }
+      Mod+Shift+K { move-window-up; }
+      Mod+Shift+Left { move-column-left-or-to-monitor-left; }
+      Mod+Shift+Right { move-column-right-or-to-monitor-right; }
+      Mod+Shift+Up { move-window-up-or-to-workspace-up; }
+      Mod+Shift+Down { move-window-down-or-to-workspace-down; }
+
+      // 将窗口并入 / 移出列（标签页）
+      Mod+BracketLeft { consume-window-into-column; }
+      Mod+BracketRight { expel-window-from-column; }
+
+      // 交换相邻窗口
+      Mod+Shift+U { swap-window-left; }
+      Mod+Shift+I { swap-window-right; }
+
+      // 音量 / 亮度
+      XF86AudioRaiseVolume { spawn-sh "noctalia msg volume-up"; }
+      XF86AudioLowerVolume { spawn-sh "noctalia msg volume-down"; }
+      XF86AudioMute { spawn-sh "noctalia msg volume-mute"; }
+      XF86MonBrightnessUp { spawn-sh "noctalia msg brightness-up"; }
+      XF86MonBrightnessDown { spawn-sh "noctalia msg brightness-down"; }
+    }
+
+    // 二合一设备：进入平板模式（物理键盘不可用）时显示屏幕键盘，
+    // 退出时隐藏。wvkbd 不自动弹出，故由平板模式事件显式控制（信号显隐，不 kill）。
+    switch-events {
+      tablet-mode-on { spawn "wvkbdctl" "show"; }
+      tablet-mode-off { spawn "wvkbdctl" "hide"; }
+    }
+
+    // 将 Noctalia 的模糊壁纸层放入 overview 背景（需 noctalia backdrop 启用）
+    layer-rule {
+      match namespace="^noctalia-backdrop"
+      place-within-backdrop true
+    }
+
+    // 模糊效果（需 niri >= 26.04，由 niri-unstable 提供）
+    blur {
+      passes 2
+      offset 3.0
+      noise 0.03
+      saturation 1.0
+    }
+
+    // 应用层模糊，但不穿透到壁纸（xray=false 更真实）
+    window-rule {
+      background-effect {
+        blur true
+        xray false
       }
+    }
 
-      debug {
-        // 允许 Noctalia 的通知操作与窗口激活
-        honor-xdg-activation-with-invalid-serial
+    // Noctalia 各层表面：关闭 xray，使用其后的窗口内容作为模糊源
+    layer-rule {
+      match namespace="^noctalia-(bar-[\"]+|notification|dock|panel|attached-panel|osd)$"
+      background-effect {
+        xray false
       }
-      hotkey-overlay {
-        skip-at-startup
+    }
+
+    // 窗口切换器：启用模糊并关闭 xray
+    layer-rule {
+      match namespace="noctalia-window-switcher"
+      background-effect {
+        blur true
+        xray false
       }
-      // 禁用热区。
-      gestures {
-        hot-corners {
-          off
-        }
-      }
-
-      binds {
-        // 核心 Noctalia 绑定
-        Mod+D { spawn-sh "noctalia msg panel-toggle launcher"; }
-        Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
-        Mod+Comma { spawn-sh "noctalia msg settings-toggle"; }
-        Alt+Tab { spawn-sh "noctalia msg window-switcher"; }
-
-        // 启动终端
-        Mod+T { spawn "ghostty"; }
-
-        // 手动切换屏幕键盘显隐（wvkbdctl toggle：发 SIGRTMIN，进程不存在则拉起）
-        Mod+O { spawn "wvkbdctl" "toggle"; }
-
-        // 窗口操作
-        Mod+Q { close-window; }
-        Mod+F { maximize-column; }
-        Mod+M { maximize-window-to-edges; }
-        Mod+Shift+F { fullscreen-window; }
-        Mod+C { center-column; }
-        Mod+Tab { toggle-overview; }
-      
-        // 聚焦窗口（HJKL 与方向键）
-        Mod+H { focus-column-left; }
-        Mod+L { focus-column-right; }
-        Mod+J { focus-window-down; }
-        Mod+K { focus-window-up; }
-        Mod+Left { focus-column-or-monitor-left; }
-        Mod+Right { focus-column-or-monitor-right; }
-        Mod+Up { focus-window-or-monitor-up; }
-        Mod+Down { focus-window-or-monitor-down; }
-
-        // 移动窗口 / 列
-        Mod+Shift+H { move-column-left; }
-        Mod+Shift+L { move-column-right; }
-        Mod+Shift+J { move-window-down; }
-        Mod+Shift+K { move-window-up; }
-        Mod+Shift+Left { move-column-left-or-to-monitor-left; }
-        Mod+Shift+Right { move-column-right-or-to-monitor-right; }
-        Mod+Shift+Up { move-window-up-or-to-workspace-up; }
-        Mod+Shift+Down { move-window-down-or-to-workspace-down; }
-
-        // 将窗口并入 / 移出列（标签页）
-        Mod+BracketLeft { consume-window-into-column; }
-        Mod+BracketRight { expel-window-from-column; }
-
-        // 交换相邻窗口
-        Mod+Shift+U { swap-window-left; }
-        Mod+Shift+I { swap-window-right; }
-
-        // 音量 / 亮度
-        XF86AudioRaiseVolume { spawn-sh "noctalia msg volume-up"; }
-        XF86AudioLowerVolume { spawn-sh "noctalia msg volume-down"; }
-        XF86AudioMute { spawn-sh "noctalia msg volume-mute"; }
-        XF86MonBrightnessUp { spawn-sh "noctalia msg brightness-up"; }
-        XF86MonBrightnessDown { spawn-sh "noctalia msg brightness-down"; }
-      }
-
-      // 二合一设备：进入平板模式（物理键盘不可用）时显示屏幕键盘，
-      // 退出时隐藏。wvkbd 不自动弹出，故由平板模式事件显式控制（信号显隐，不 kill）。
-      switch-events {
-        tablet-mode-on { spawn "wvkbdctl" "show"; }
-        tablet-mode-off { spawn "wvkbdctl" "hide"; }
-      }
-
-      // 将 Noctalia 的模糊壁纸层放入 overview 背景（需 noctalia backdrop 启用）
-      layer-rule {
-        match namespace="^noctalia-backdrop"
-        place-within-backdrop true
-      }
-
-      // 模糊效果（需 niri >= 26.04，由 niri-unstable 提供）
-      blur {
-        passes 2 
-        offset 3.0
-        noise 0.03
-        saturation 1.0
-      }
-
-      // 应用层模糊，但不穿透到壁纸（xray=false 更真实）
-      window-rule {
-        background-effect {
-          blur true
-          xray false
-        }
-      }
-
-      // Noctalia 各层表面：关闭 xray，使用其后的窗口内容作为模糊源
-      layer-rule {
-        match namespace="^noctalia-(bar-[\"]+|notification|dock|panel|attached-panel|osd)$"
-        background-effect {
-          xray false
-        }
-      }
-
-      // 窗口切换器：启用模糊并关闭 xray
-      layer-rule {
-        match namespace="noctalia-window-switcher"
-        background-effect {
-          blur true
-          xray false
-        }
-      }
-    '';
-  };
+    }
+  '';
 }

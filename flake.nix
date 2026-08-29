@@ -23,18 +23,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # niri 的 NixOS/Home Manager 模块与上游构建的包（追新）。
-    # 注意：不能写 inputs.nixpkgs.follows——它依赖的库版本随其锁定的
-    # nixpkgs 走，跟随我们的会导致缓存失效甚至缺依赖
-    niri.url = "github:sodiboo/niri-flake";
-
   };
 
   outputs = {
     self,
     nixpkgs,
     home-manager,
-    niri,
     noctalia,
     noctalia-greeter
   }: let
@@ -53,12 +47,6 @@
           # 的 programs.noctalia 声明式设置使用
           home-manager.sharedModules = [noctalia.homeModules.default];
           home-manager.users.tiantian = import ./home/tiantian;
-        }
-        niri.nixosModules.niri
-        {
-          # 使用 niri-flake 上游预构建的 niri-unstable（最新主分支，
-          # 命中其 cachix 缓存），避免用本地 pkgs 重编译
-          programs.niri.package = niri.packages.${system}.niri-unstable;
         }
         noctalia.nixosModules.default
         noctalia-greeter.nixosModules.default

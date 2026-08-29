@@ -11,14 +11,8 @@
   ];
 
   # niri Wayland 合成器（替代 GNOME）
-  # 模块来自上游 niri-flake；包用上游预构建的 unstable（追新，
-  # 命中 niri.cachix.org 缓存。stable 25.08 依赖的 libdisplay-info_0_2
-  # 已从当前 nixpkgs 移除，故不使用模块默认包）
-  programs.niri.enable = true;
-
-  # 关闭 niri-flake 自带的 KDE polkit 代理，改用 noctalia 内置代理，
-  # 避免两者同时运行导致重复授权弹窗
-  #systemd.user.services.niri-flake-polkit.wantedBy = lib.mkForce [];
+  # 已删除 niri-flake：niri 包与 ~/.config/niri/config.kdl 统一由
+  # home-manager（home/tiantian/niri.nix）管理，这里不再启用 NixOS 模块。
 
   # noctalia 桌面壳（上游 flake 模块）；声明式设置见 home/tiantian/noctalia.nix。
   # recommendedServices：NetworkManager、蓝牙、UPower 与电源档位服务
