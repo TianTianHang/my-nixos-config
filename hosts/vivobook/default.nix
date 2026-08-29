@@ -2,6 +2,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/boot.nix
+    ../../modules/acpi-fix.nix
     ../../modules/btrfs.nix
     ../../modules/desktop.nix
     ../../modules/greeter.nix
