@@ -61,7 +61,7 @@ let
     nativeBuildInputs = [ pkgs.cpio ];
   } ''
     mkdir -p root/kernel/firmware/acpi
-    cp ${ssdt} root/kernel/firmware/acpi/ssdt-dptf-fix.aml
+    cp ${ssdt} root/kernel/firmware/acpi/dptf.aml
     (cd root && find . -print0 | sort -z | cpio --quiet -o -H newc -R +0:+0 --reproducible --null) > "$out"
   '';
 in {
