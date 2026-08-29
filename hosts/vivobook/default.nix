@@ -5,6 +5,7 @@
     ../../modules/acpi-fix.nix
     ../../modules/btrfs.nix
     ../../modules/desktop.nix
+    ../../modules/easytier.nix
     ../../modules/greeter.nix
     ../../modules/input-method.nix
     ../../modules/localization.nix
