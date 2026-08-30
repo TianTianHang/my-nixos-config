@@ -7,9 +7,6 @@
     // 启动 fcitx5 输入法框架（提供 Rime 等输入法；Wayland 前端由模块启用）
     spawn-at-startup "fcitx5"
 
-    // 启动 maliit 屏幕键盘服务
-    spawn-at-startup "maliit-server"
-
     // 触控板：轻点即点击（tap-to-click）与自然滚动
     input {
       touchpad {
@@ -104,9 +101,6 @@
       XF86AudioMute { spawn-sh "noctalia msg volume-mute"; }
       XF86MonBrightnessUp { spawn-sh "noctalia msg brightness-up"; }
       XF86MonBrightnessDown { spawn-sh "noctalia msg brightness-down"; }
-
-      // 切换 maliit 屏幕键盘显示
-      Mod+Shift+K { spawn "maliit-server" "-t"; }
     }
 
     // 将 Noctalia 的模糊壁纸层放入 overview 背景（需 noctalia backdrop 启用）
