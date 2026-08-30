@@ -8,13 +8,13 @@
     ../../modules/easytier.nix
     ../../modules/greeter.nix
     ../../modules/input-method.nix
+    ../../modules/maliit.nix
     ../../modules/localization.nix
     ../../modules/networking.nix
     ../../modules/nix.nix
     ../../modules/packages.nix
     ../../modules/user.nix
     ../../modules/waydroid.nix
-    ../../modules/wvkbd.nix
   ];
 
   networking.hostName = "vivobook";

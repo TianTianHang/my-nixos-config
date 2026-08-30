@@ -1,10 +1,5 @@
 {pkgs, ...}: {
-  # 直接以 home-manager 管理 niri 的配置文件（不再依赖 niri-flake）。
-  # 配置原样写入 ~/.config/niri/config.kdl，由 niri 在启动时自行解析 / 校验。
-  home.packages = with pkgs; [
-    niri
-  ];
-
+  
   xdg.configFile."niri/config.kdl".text = ''
     // 启动 Noctalia 桌面壳
     spawn-at-startup "noctalia"
@@ -12,9 +7,8 @@
     // 启动 fcitx5 输入法框架（提供 Rime 等输入法；Wayland 前端由模块启用）
     spawn-at-startup "fcitx5"
 
-    // 屏幕键盘：wvkbd 走虚拟键盘协议，不与 fcitx5 抢 input-method 角色。
-    // 用 wvkbdctl 以 --hidden 常驻后台，靠信号显隐（见 modules/wvkbd.nix）。
-    spawn-at-startup "wvkbdctl" "start"
+    // 启动 maliit 屏幕键盘服务
+    spawn-at-startup "maliit-server"
 
     // 触控板：轻点即点击（tap-to-click）与自然滚动
     input {
@@ -68,9 +62,6 @@
       // 启动终端
       Mod+T { spawn "ghostty"; }
 
-      // 手动切换屏幕键盘显隐（wvkbdctl toggle：发 SIGRTMIN，进程不存在则拉起）
-      Mod+O { spawn "wvkbdctl" "toggle"; }
-
       // 窗口操作
       Mod+Q { close-window; }
       Mod+F { maximize-column; }
@@ -113,13 +104,9 @@
       XF86AudioMute { spawn-sh "noctalia msg volume-mute"; }
       XF86MonBrightnessUp { spawn-sh "noctalia msg brightness-up"; }
       XF86MonBrightnessDown { spawn-sh "noctalia msg brightness-down"; }
-    }
 
-    // 二合一设备：进入平板模式（物理键盘不可用）时显示屏幕键盘，
-    // 退出时隐藏。wvkbd 不自动弹出，故由平板模式事件显式控制（信号显隐，不 kill）。
-    switch-events {
-      tablet-mode-on { spawn "wvkbdctl" "show"; }
-      tablet-mode-off { spawn "wvkbdctl" "hide"; }
+      // 切换 maliit 屏幕键盘显示
+      Mod+Shift+K { spawn "maliit-server" "-t"; }
     }
 
     // 将 Noctalia 的模糊壁纸层放入 overview 背景（需 noctalia backdrop 启用）
