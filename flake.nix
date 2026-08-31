@@ -34,9 +34,18 @@
   }: let
     system = "x86_64-linux";
     pkgs = import nixpkgs {inherit system;};
+    # 自定义包覆盖
+    overlay = final: prev: {
+      fcitx5-osk = final.callPackage "${self}/pkgs/fcitx5-osk/default.nix" {};
+    };
+    pkgsWithOverlay = import nixpkgs {
+      inherit system;
+      overlays = [overlay];
+    };
   in {
     nixosConfigurations.vivobook = nixpkgs.lib.nixosSystem {
       inherit system;
+      pkgs = pkgsWithOverlay;
       modules = [
         ./hosts/vivobook
         home-manager.nixosModules.home-manager
@@ -52,5 +61,8 @@
         noctalia-greeter.nixosModules.default
       ];
     };
+
+    # 导出自定义包供单独构建测试
+    packages.x86_64-linux.fcitx5-osk = pkgsWithOverlay.fcitx5-osk;
   };
 }
