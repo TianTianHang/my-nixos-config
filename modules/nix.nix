@@ -11,4 +11,19 @@
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
   ];
+  nix.settings.trusted-users = [ "root" "nixremote" "tiantian" ];
+
+  # 远程构建配置
+  nix.distributedBuilds = true;
+  nix.buildMachines = [
+    {
+      hostName = "192.168.100.202";
+      system = "x86_64-linux";
+      protocol = "ssh";
+      sshUser = "nixremote";
+      maxJobs = 10;
+      speedFactor = 2;
+      supportedFeatures = [ "kvm" "big-parallel" "nixos-test" ];
+    }
+  ];
 }
