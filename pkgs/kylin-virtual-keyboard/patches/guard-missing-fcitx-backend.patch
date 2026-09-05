@@ -1,6 +1,12 @@
 diff --git a/src/virtualkeyboard/virtualkeyboardmodel.cpp b/src/virtualkeyboard/virtualkeyboardmodel.cpp
 --- a/src/virtualkeyboard/virtualkeyboardmodel.cpp
 +++ b/src/virtualkeyboard/virtualkeyboardmodel.cpp
+@@ -20,4 +20,5 @@
+ #include <QDBusConnection>
++#include <QDBusConnectionInterface>
+ #include <QDBusMetaType>
+ #include <QDBusPendingReply>
+ #include "log.h"
 @@ -35,5 +35,9 @@ void VirtualKeyboardModel::updateCandidateArea(
  }
  
@@ -11,7 +17,7 @@ diff --git a/src/virtualkeyboard/virtualkeyboardmodel.cpp b/src/virtualkeyboard/
 +    }
      virtualKeyboardBackendInterface_->asyncCall("SelectCandidate", index);
  }
-@@ -47,5 +51,9 @@ void VirtualKeyboardModel::processKeyEvent(int keysym, int keycode, int state,
+@@ -47,5 +47,9 @@ void VirtualKeyboardModel::processKeyEvent(int keysym, int keycode, int state,
          return;
      }
  
@@ -22,4 +28,13 @@ diff --git a/src/virtualkeyboard/virtualkeyboardmodel.cpp b/src/virtualkeyboard/
      virtualKeyboardBackendInterface_->asyncCall("ProcessKeyEvent", (uint)keysym,
                                                  (uint)keycode, (uint)state,
                                                  isRelease, (uint)time);
- }
+@@ -70,2 +70,9 @@ void VirtualKeyboardModel::initDBusServiceWatcher() {
+     connect(serviceWatcher_.get(), SIGNAL(serviceUnregistered(const QString &)),
+             this, SLOT(backendServiceUnregistered(const QString &)));
++
++    // Fcitx5 commonly starts before the keyboard GUI, so no registration signal
++    // is emitted after the watcher is installed.
++    if (QDBusConnection::sessionBus().interface()->isServiceRegistered(
++            virtualKeyboardBackendService)) {
++        backendServiceRegistered(virtualKeyboardBackendService);
++    }
