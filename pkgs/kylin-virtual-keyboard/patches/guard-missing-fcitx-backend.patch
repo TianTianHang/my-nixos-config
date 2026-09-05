@@ -1,7 +1,8 @@
 diff --git a/src/virtualkeyboard/virtualkeyboardmodel.cpp b/src/virtualkeyboard/virtualkeyboardmodel.cpp
+index 6d9d553..62d2e99 100644
 --- a/src/virtualkeyboard/virtualkeyboardmodel.cpp
 +++ b/src/virtualkeyboard/virtualkeyboardmodel.cpp
-@@ -35,5 +35,10 @@ void VirtualKeyboardModel::updateCandidateArea(
+@@ -35,6 +35,11 @@ void VirtualKeyboardModel::updateCandidateArea(
  }
  
  void VirtualKeyboardModel::selectCandidate(int index) {
@@ -12,7 +13,8 @@ diff --git a/src/virtualkeyboard/virtualkeyboardmodel.cpp b/src/virtualkeyboard/
 +    }
      virtualKeyboardBackendInterface_->asyncCall("SelectCandidate", index);
  }
-@@ -47,5 +47,10 @@ void VirtualKeyboardModel::processKeyEvent(int keysym, int keycode, int state,
+ 
+@@ -51,6 +56,11 @@ void VirtualKeyboardModel::processKeyEvent(int keysym, int keycode, int state,
          return;
      }
  
@@ -24,7 +26,8 @@ diff --git a/src/virtualkeyboard/virtualkeyboardmodel.cpp b/src/virtualkeyboard/
      virtualKeyboardBackendInterface_->asyncCall("ProcessKeyEvent", (uint)keysym,
                                                  (uint)keycode, (uint)state,
                                                  isRelease, (uint)time);
-@@ -70,2 +70,9 @@ void VirtualKeyboardModel::initDBusServiceWatcher() {
+@@ -75,6 +85,13 @@ void VirtualKeyboardModel::initDBusServiceWatcher() {
+             this, SLOT(backendServiceRegistered(const QString &)));
      connect(serviceWatcher_.get(), SIGNAL(serviceUnregistered(const QString &)),
              this, SLOT(backendServiceUnregistered(const QString &)));
 +
@@ -34,3 +37,6 @@ diff --git a/src/virtualkeyboard/virtualkeyboardmodel.cpp b/src/virtualkeyboard/
 +    if (virtualKeyboardBackendInterface_->isValid()) {
 +        backendServiceRegistered(virtualKeyboardBackendService);
 +    }
+ }
+ 
+ void VirtualKeyboardModel::initVirtualKeyboardBackendInterface() {

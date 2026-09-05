@@ -56,15 +56,12 @@ stdenv.mkDerivation (finalAttrs: {
     substituteInPlace data/CMakeLists.txt \
       --replace-fail "/etc/xdg/autostart" "${placeholder "out"}/etc/xdg/autostart"
 
-    # Do not route the tray toggle through Fcitx. Fcitx may immediately send
-    # a hide request when there is no active input context, causing a loop.
+    # Keep hide requests local to avoid a feedback loop, while show requests
+    # must go through Fcitx so it can activate the on-screen keyboard UI.
     substituteInPlace src/virtualkeyboardentry/virtualkeyboardtrayicon.cpp \
       --replace-fail \
         'fcitxVirtualKeyboardService_.hideVirtualKeyboard();' \
-        'virtualKeyboardManager_.hideVirtualKeyboard();' \
-      --replace-fail \
-        'fcitxVirtualKeyboardService_.showVirtualKeyboard();' \
-        'virtualKeyboardManager_.showVirtualKeyboard();'
+        'virtualKeyboardManager_.hideVirtualKeyboard();'
 
     substituteInPlace src/virtualkeyboard/virtualkeyboardmanager.cpp \
       --replace-fail \
@@ -87,10 +84,7 @@ stdenv.mkDerivation (finalAttrs: {
     substituteInPlace src/virtualkeyboardentry/floatbuttonmanager.cpp \
       --replace-fail \
         'fcitxVirtualKeyboardService_.hideVirtualKeyboard();' \
-        'virtualKeyboardManager_.hideVirtualKeyboard();' \
-      --replace-fail \
-        'fcitxVirtualKeyboardService_.showVirtualKeyboard();' \
-        'virtualKeyboardManager_.showVirtualKeyboard();'
+        'virtualKeyboardManager_.hideVirtualKeyboard();'
 
   '';
 
