@@ -1,0 +1,66 @@
+diff --git a/src/virtualkeyboard/virtualkeyboardmanager.cpp b/src/virtualkeyboard/virtualkeyboardmanager.cpp
+index de50449..b15c662 100644
+--- a/src/virtualkeyboard/virtualkeyboardmanager.cpp
++++ b/src/virtualkeyboard/virtualkeyboardmanager.cpp
+@@ -136,7 +136,7 @@ void VirtualKeyboardManager::initWorkspaceAdjuster() {
+     if (getDesktopEnvironment() == DesktopEnvironment::UKUI &&
+         getDesktopType() == DesktopType::WAYLAND) {
+         workspaceAdjuster_.reset(new WaylandWlcomWorkspaceAdjuster());
+-    } else {
++    } else if (getDesktopType() != DesktopType::WAYLAND) {
+ #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+         workspaceAdjuster_.reset(new X11Kf6WorkspaceAdjuster());
+ #else
+diff --git a/src/virtualkeyboard/virtualkeyboardview.cpp b/src/virtualkeyboard/virtualkeyboardview.cpp
+index 4af5251..b6f94a8 100644
+--- a/src/virtualkeyboard/virtualkeyboardview.cpp
++++ b/src/virtualkeyboard/virtualkeyboardview.cpp
+@@ -184,7 +184,10 @@ void VirtualKeyboardView::initView() {
+         QPair<QRegion, int> blurPair(QRegion(), 0);
+         view_->setProperty(UkuiWaylandProperty::SURFACE_BLUR,
+                            QVariant::fromValue(blurPair));
++    } else if (getDesktopType() == DesktopType::WAYLAND) {
++        view_->setFlags(Qt::Window | Qt::WindowDoesNotAcceptFocus |
++                        Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+     } else {
+         view_->setFlags(Qt::Window | Qt::WindowDoesNotAcceptFocus |
+                         Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
+                         Qt::BypassWindowManagerHint);
+diff --git a/src/virtualkeyboardentry/floatbutton.cpp b/src/virtualkeyboardentry/floatbutton.cpp
+index 8709f85..8210c7c 100644
+--- a/src/virtualkeyboardentry/floatbutton.cpp
++++ b/src/virtualkeyboardentry/floatbutton.cpp
+@@ -163,9 +163,10 @@ void FloatButton::initAttributes() {
+     setAttribute(Qt::WA_TranslucentBackground);
+     setAttribute(Qt::WA_AlwaysShowToolTips, true);
+     setToolTip(tr("Click to show virtual keyboard"));
++    setAttribute(Qt::WA_X11DoNotAcceptFocus);
+ 
+     setWindowFlags(Qt::FramelessWindowHint | Qt::BypassWindowManagerHint |
+-                   Qt::Tool);
++                   Qt::Tool | Qt::WindowDoesNotAcceptFocus);
+ 
+     // 主题框架默认禁用了move消息，因此，QPushButton需要禁用主题框架
+     setProperty("useStyleWindowManager", QVariant(false));
+diff --git a/src/workspaceadjuster/waylandworkspaceadjuster.cpp b/src/workspaceadjuster/waylandworkspaceadjuster.cpp
+index 626198d..2a0b99f 100644
+--- a/src/workspaceadjuster/waylandworkspaceadjuster.cpp
++++ b/src/workspaceadjuster/waylandworkspaceadjuster.cpp
+@@ -22,6 +22,7 @@
+ #include <QVariant>
+ 
+ #include "../log.h"
++#include "../utils.h"
+ #include "ukuiwaylandhelper/ukuiwaylandproperties.h"
+ 
+ WaylandWlcomWorkspaceAdjuster::WaylandWlcomWorkspaceAdjuster() {
+@@ -54,6 +55,9 @@ void WaylandWlcomWorkspaceAdjuster::setSurfaceWindowProperty(
+         KVKBD_WARN("surfaceWindow_ is null, skip ukui_surface_anchor.");
+         return;
+     }
++    if (getDesktopEnvironment() != DesktopEnvironment::UKUI) {
++        return;
++    }
+     QScreen *screen = surfaceWindow_->screen();
+     if (screen == nullptr) {
+         screen = QGuiApplication::primaryScreen();

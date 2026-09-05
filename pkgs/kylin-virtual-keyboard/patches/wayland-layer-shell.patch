@@ -1,0 +1,46 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,4 +21,5 @@ find_package(Qt6 COMPONENTS Core Gui Widgets Concurrent DBus Quick QuickControls2 Core5Compat REQUIRED)
+ message(STATUS "Current Qt version: ${Qt6_VERSION}")
+ 
+ find_package(KF6WindowSystem REQUIRED)
++find_package(LayerShellQt REQUIRED)
+ if(NOT KF6WindowSystem_FOUND)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -92,4 +92,5 @@ target_link_libraries(${PROJECT_NAME}
+                 Qt6::QuickControls2
+                 Qt6::Core5Compat
+                 KF6::WindowSystem
++                LayerShellQt::Interface
+                 Fcitx5::Core
+diff --git a/src/virtualkeyboard/virtualkeyboardview.cpp b/src/virtualkeyboard/virtualkeyboardview.cpp
+--- a/src/virtualkeyboard/virtualkeyboardview.cpp
++++ b/src/virtualkeyboard/virtualkeyboardview.cpp
+@@ -18,4 +18,5 @@
+ #include "virtualkeyboard/virtualkeyboardview.h"
+ #include <QQmlContext>
+ #include <QQuickItem>
++#include <LayerShellQt/Window>
+ #include "log.h"
+@@ -196,3 +197,18 @@ void VirtualKeyboardView::initView() {
+ 
+     view_->setGeometry(calculateInitialGeometry());
++    if (getDesktopType() == DesktopType::WAYLAND) {
++        auto *layerShellWindow = LayerShellQt::Window::get(view_.get());
++        layerShellWindow->setAnchors(LayerShellQt::Window::Anchors(
++            LayerShellQt::Window::AnchorTop |
++            LayerShellQt::Window::AnchorLeft));
++        layerShellWindow->setLayer(LayerShellQt::Window::LayerOverlay);
++        layerShellWindow->setKeyboardInteractivity(
++            LayerShellQt::Window::KeyboardInteractivityNone);
++        layerShellWindow->setActivateOnShow(false);
++        layerShellWindow->setScope("kylin-virtual-keyboard");
++        layerShellWindow->setDesiredSize(geometry().size());
++        const auto initialGeometry = geometry();
++        layerShellWindow->setMargins(QMargins(
++            initialGeometry.x(), initialGeometry.y(), 0, 0));
++    }
+     emit positionChanged(geometry().topLeft());

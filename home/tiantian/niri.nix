@@ -4,8 +4,8 @@
     // 启动 Noctalia 桌面壳
     spawn-at-startup "noctalia"
 
-    // 启动 fcitx5 输入法框架（提供 Rime 等输入法；Wayland 前端由模块启用）
-    spawn-at-startup "fcitx5"
+    // 启动 xwayland-satellite 以支持 X11 应用
+    spawn-at-startup "xwayland-satellite"
 
     // 触控板：轻点即点击（tap-to-click）与自然滚动
     input {
@@ -33,6 +33,13 @@
       open-floating true
       default-column-width { fixed 1080; }
       default-window-height { fixed 920; }
+    }
+
+    // 虚拟键盘是临时输入面板，不应参与普通窗口平铺
+    window-rule {
+      match app-id="kylin-virtual-keyboard"
+      open-floating true
+      open-focused false
     }
 
     debug {

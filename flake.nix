@@ -36,13 +36,15 @@
     pkgs = import nixpkgs {inherit system;};
     # 自定义包覆盖
     overlay = final: prev: {
-      fcitx5-osk = final.callPackage "${self}/pkgs/fcitx5-osk/default.nix" {};
+      kylin-virtual-keyboard = final.callPackage ./pkgs/kylin-virtual-keyboard/package.nix {};
     };
     pkgsWithOverlay = import nixpkgs {
       inherit system;
       overlays = [overlay];
     };
   in {
+    packages.x86_64-linux.kylin-virtual-keyboard = pkgsWithOverlay.kylin-virtual-keyboard;
+
     nixosConfigurations.vivobook = nixpkgs.lib.nixosSystem {
       inherit system;
       pkgs = pkgsWithOverlay;
@@ -61,8 +63,5 @@
         noctalia-greeter.nixosModules.default
       ];
     };
-
-    # 导出自定义包供单独构建测试
-    packages.x86_64-linux.fcitx5-osk = pkgsWithOverlay.fcitx5-osk;
   };
 }

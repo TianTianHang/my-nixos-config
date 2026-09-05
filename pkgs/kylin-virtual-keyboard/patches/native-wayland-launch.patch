@@ -1,0 +1,22 @@
+diff --git a/data/org.ukui.virtualkeyboard.start.sh.in b/data/org.ukui.virtualkeyboard.start.sh.in
+--- a/data/org.ukui.virtualkeyboard.start.sh.in
++++ b/data/org.ukui.virtualkeyboard.start.sh.in
+@@ -6,6 +6,6 @@
+ desktop_env=$(echo "$XDG_CURRENT_DESKTOP" | tr '[:upper:]' '[:lower:]')
+ session_type=$(echo "$XDG_SESSION_TYPE" | tr '[:upper:]' '[:lower:]')
+ 
+-if [[ "$desktop_env" == *"ukui"* ]] && [[ "$session_type" == "wayland" ]]; then
++if [[ "$session_type" == "wayland" ]]; then
+     exec @CMAKE_INSTALL_FULL_BINDIR@/kylin-virtual-keyboard
+ else
+diff --git a/src/main.cpp b/src/main.cpp
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
+     QtSingleApplication app(APP_ID, argc, argv);
+     QtSingleApplication::setApplicationName(APP_ID);
+     QtSingleApplication::setApplicationVersion(APP_VERSION);
++    QGuiApplication::setDesktopFileName(APP_ID);
+ 
+     // 命令行处理器
+     CommandLineHandler commandHandler;

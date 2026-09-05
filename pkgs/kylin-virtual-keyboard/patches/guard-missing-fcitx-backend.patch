@@ -1,0 +1,25 @@
+diff --git a/src/virtualkeyboard/virtualkeyboardmodel.cpp b/src/virtualkeyboard/virtualkeyboardmodel.cpp
+--- a/src/virtualkeyboard/virtualkeyboardmodel.cpp
++++ b/src/virtualkeyboard/virtualkeyboardmodel.cpp
+@@ -35,5 +35,9 @@ void VirtualKeyboardModel::updateCandidateArea(
+ }
+ 
+ void VirtualKeyboardModel::selectCandidate(int index) {
++    if (virtualKeyboardBackendInterface_ == nullptr) {
++        KVKBD_WARN("virtual keyboard backend is unavailable, cannot select candidate");
++        return;
++    }
+     virtualKeyboardBackendInterface_->asyncCall("SelectCandidate", index);
+ }
+@@ -47,5 +51,9 @@ void VirtualKeyboardModel::processKeyEvent(int keysym, int keycode, int state,
+         return;
+     }
+ 
++    if (virtualKeyboardBackendInterface_ == nullptr) {
++        KVKBD_WARN("virtual keyboard backend is unavailable, ignoring key event");
++        return;
++    }
+     virtualKeyboardBackendInterface_->asyncCall("ProcessKeyEvent", (uint)keysym,
+                                                 (uint)keycode, (uint)state,
+                                                 isRelease, (uint)time);
+ }

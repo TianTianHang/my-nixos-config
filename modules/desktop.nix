@@ -2,6 +2,7 @@
   environment.systemPackages = with pkgs; [
     ghostty
     nautilus
+    xwayland-satellite
 
     # 供 home 配置写 dconf 值（dconf.settings）
     dconf
