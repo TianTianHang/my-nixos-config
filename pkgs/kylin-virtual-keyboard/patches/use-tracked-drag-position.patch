@@ -1,0 +1,38 @@
+diff --git a/src/geometrymanager/floatgeometrymanager.cpp b/src/geometrymanager/floatgeometrymanager.cpp
+index e6a9d04..3c604e4 100644
+--- a/src/geometrymanager/floatgeometrymanager.cpp
++++ b/src/geometrymanager/floatgeometrymanager.cpp
+@@ -66,6 +66,10 @@ void FloatGeometryManager::pressed() {
+     dragStartPosition_ = calculateCurrentPosition();
+ }
+ 
++QPoint FloatGeometryManager::currentPosition() const {
++    return GeometryManager::currentPosition_;
++}
++
+ void FloatGeometryManager::moveBy(int offsetX, int offsetY) {
+     const QPoint offset(offsetX, offsetY);
+     const auto targetPosition = dragStartPosition_ + offset;
+diff --git a/src/geometrymanager/floatgeometrymanager.h b/src/geometrymanager/floatgeometrymanager.h
+index 8f84aff..a76599b 100644
+--- a/src/geometrymanager/floatgeometrymanager.h
++++ b/src/geometrymanager/floatgeometrymanager.h
+@@ -40,6 +40,7 @@ public slots:
+     void pressed();
+     void moveBy(int offsetX, int offsetY);
+     void endDrag(const QPoint &position);
++    QPoint currentPosition() const;
+     void updateViewMarginRatio();
+ 
+ private:
+diff --git a/src/virtualkeyboard/virtualkeyboardview.cpp b/src/virtualkeyboard/virtualkeyboardview.cpp
+index 59dd368..3bb1f31 100644
+--- a/src/virtualkeyboard/virtualkeyboardview.cpp
++++ b/src/virtualkeyboard/virtualkeyboardview.cpp
+@@ -87,7 +87,7 @@ void VirtualKeyboardView::endDrag() {
+         return;
+     }
+ 
+-    floatGeometryManager_->endDrag(floatGeometryManager_->geometry().topLeft());
++    floatGeometryManager_->endDrag(floatGeometryManager_->currentPosition());
+ }

@@ -31,6 +31,8 @@ stdenv.mkDerivation (finalAttrs: {
     ./patches/wayland-layer-shell.patch
     ./patches/wayland-layer-position.patch
     ./patches/drag-and-startup.patch
+    ./patches/persist-wayland-drag-position.patch
+    ./patches/use-tracked-drag-position.patch
     ./patches/visibility-actions.patch
   ];
 
