@@ -1,0 +1,41 @@
+diff --git a/src/geometrymanager/floatgeometrymanager.cpp b/src/geometrymanager/floatgeometrymanager.cpp
+index 7b12304..e1136c3 100644
+--- a/src/geometrymanager/floatgeometrymanager.cpp
++++ b/src/geometrymanager/floatgeometrymanager.cpp
+@@ -61,15 +61,18 @@ FloatGeometryManager::FloatGeometryManager(std::unique_ptr<Strategy> strategy,
+ 
+ FloatGeometryManager::~FloatGeometryManager() {}
+ 
+-void FloatGeometryManager::pressed() { lastSize_ = calculateViewSize(); }
++void FloatGeometryManager::pressed() {
++    lastSize_ = calculateViewSize();
++    dragStartPosition_ = calculateCurrentPosition();
++}
+ 
+ void FloatGeometryManager::moveBy(int offsetX, int offsetY) {
+     const QPoint offset(offsetX, offsetY);
+-    const auto currentPosition = calculateCurrentPosition();
+-    updateCurrentPostion(currentPosition);
+-    KVKBD_DEBUG("current position:{},{}, offset:{},{}", currentPosition.x(),
+-                currentPosition.y(), offset.x(), offset.y());
+-    moveView(QPoint(currentPosition + offset));
++    const auto targetPosition = dragStartPosition_ + offset;
++    KVKBD_DEBUG("target position:{},{}, offset:{},{}", targetPosition.x(),
++                targetPosition.y(), offset.x(), offset.y());
++    updateCurrentPostion(targetPosition);
++    moveView(targetPosition);
+ }
+ void FloatGeometryManager::endDrag(const QPoint &position) {
+     updateCurrentPostion(position);
+diff --git a/src/geometrymanager/floatgeometrymanager.h b/src/geometrymanager/floatgeometrymanager.h
+index 1879f24..8f84aff 100644
+--- a/src/geometrymanager/floatgeometrymanager.h
++++ b/src/geometrymanager/floatgeometrymanager.h
+@@ -82,6 +82,7 @@ private:
+     float topMarginRatio_ = 0.0f;
+ 
+     QSize lastSize_;
++    QPoint dragStartPosition_;
+ 
+     std::unique_ptr<Strategy> strategy_;
+ 

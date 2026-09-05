@@ -1,31 +1,41 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 38eb284..2c03410 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -21,4 +21,5 @@ find_package(Qt6 COMPONENTS Core Gui Widgets Concurrent DBus Quick QuickControls2 Core5Compat REQUIRED)
- message(STATUS "Current Qt version: ${Qt6_VERSION}")
+@@ -23,6 +23,7 @@ message(STATUS "Current Qt version: ${Qt6_VERSION}")
  
+ # KDE Frameworks 6 窗口系统（对应 Qt6 的 KF6）
  find_package(KF6WindowSystem REQUIRED)
 +find_package(LayerShellQt REQUIRED)
  if(NOT KF6WindowSystem_FOUND)
+     message(FATAL_ERROR "KF6WindowSystem not found!")
+ endif()
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 7d9b958..f438a04 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -92,4 +92,5 @@ target_link_libraries(${PROJECT_NAME}
+@@ -92,6 +92,7 @@ target_link_libraries(${PROJECT_NAME}
                  Qt6::QuickControls2
                  Qt6::Core5Compat
                  KF6::WindowSystem
 +                LayerShellQt::Interface
                  Fcitx5::Core
+                 ${GSettings_QT_LIBRARIES}
+                 qtsingleapplication
 diff --git a/src/virtualkeyboard/virtualkeyboardview.cpp b/src/virtualkeyboard/virtualkeyboardview.cpp
+index 4331845..b2ca90c 100644
 --- a/src/virtualkeyboard/virtualkeyboardview.cpp
 +++ b/src/virtualkeyboard/virtualkeyboardview.cpp
-@@ -18,4 +18,5 @@
+@@ -18,6 +18,7 @@
  #include "virtualkeyboard/virtualkeyboardview.h"
  #include <QQmlContext>
  #include <QQuickItem>
 +#include <LayerShellQt/Window>
  #include "log.h"
-@@ -196,3 +197,18 @@ void VirtualKeyboardView::initView() {
+ #include "screenwatcher.h"
+ #include "shadowborderitem.h"
+@@ -194,6 +195,21 @@ void VirtualKeyboardView::initView() {
+     }
  
      view_->setGeometry(calculateInitialGeometry());
 +    if (getDesktopType() == DesktopType::WAYLAND) {
@@ -44,3 +54,5 @@ diff --git a/src/virtualkeyboard/virtualkeyboardview.cpp b/src/virtualkeyboard/v
 +            initialGeometry.x(), initialGeometry.y(), 0, 0));
 +    }
      emit positionChanged(geometry().topLeft());
+     setViewOpacity();
+ 

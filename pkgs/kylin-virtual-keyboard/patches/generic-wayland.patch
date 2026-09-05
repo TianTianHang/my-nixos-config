@@ -12,10 +12,10 @@ index de50449..b15c662 100644
          workspaceAdjuster_.reset(new X11Kf6WorkspaceAdjuster());
  #else
 diff --git a/src/virtualkeyboard/virtualkeyboardview.cpp b/src/virtualkeyboard/virtualkeyboardview.cpp
-index 4af5251..b6f94a8 100644
+index 4af5251..4331845 100644
 --- a/src/virtualkeyboard/virtualkeyboardview.cpp
 +++ b/src/virtualkeyboard/virtualkeyboardview.cpp
-@@ -184,7 +184,10 @@ void VirtualKeyboardView::initView() {
+@@ -184,6 +184,9 @@ void VirtualKeyboardView::initView() {
          QPair<QRegion, int> blurPair(QRegion(), 0);
          view_->setProperty(UkuiWaylandProperty::SURFACE_BLUR,
                             QVariant::fromValue(blurPair));
@@ -25,7 +25,6 @@ index 4af5251..b6f94a8 100644
      } else {
          view_->setFlags(Qt::Window | Qt::WindowDoesNotAcceptFocus |
                          Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
-                         Qt::BypassWindowManagerHint);
 diff --git a/src/virtualkeyboardentry/floatbutton.cpp b/src/virtualkeyboardentry/floatbutton.cpp
 index 8709f85..8210c7c 100644
 --- a/src/virtualkeyboardentry/floatbutton.cpp

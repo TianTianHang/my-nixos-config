@@ -1,0 +1,70 @@
+diff --git a/src/virtualkeyboard/virtualkeyboardmanager.cpp b/src/virtualkeyboard/virtualkeyboardmanager.cpp
+index b15c662..429d62d 100644
+--- a/src/virtualkeyboard/virtualkeyboardmanager.cpp
++++ b/src/virtualkeyboard/virtualkeyboardmanager.cpp
+@@ -83,7 +83,7 @@ void VirtualKeyboardManager::hide() {
+         return;
+     }
+ 
+-    hideVirtualKeyboardCallback_();
++    hideVirtualKeyboard();
+ }
+ 
+ void VirtualKeyboardManager::flipPlacementMode() { view_->flip(); }
+diff --git a/src/virtualkeyboardentry/floatbuttonmanager.cpp b/src/virtualkeyboardentry/floatbuttonmanager.cpp
+index ca09341..246cc56 100644
+--- a/src/virtualkeyboardentry/floatbuttonmanager.cpp
++++ b/src/virtualkeyboardentry/floatbuttonmanager.cpp
+@@ -31,7 +31,7 @@
+ #include "virtualkeyboardentry/floatbuttonstrategy.h"
+ 
+ FloatButtonManager::FloatButtonManager(
+-    const VirtualKeyboardManager &virtualKeyboardManager,
++    VirtualKeyboardManager &virtualKeyboardManager,
+     const FcitxVirtualKeyboardService &fcitxVirtualKeyboardService,
+     LocalSettings &floatButtonSettings, ThemeWatcher &themeWatcher)
+     : virtualKeyboardManager_(virtualKeyboardManager),
+@@ -84,7 +84,7 @@ void FloatButtonManager::initInternalSignalConnections() {
+ }
+ 
+ void FloatButtonManager::initFloatButton() {
+-    fcitxVirtualKeyboardService_.hideVirtualKeyboard();
++    virtualKeyboardManager_.hideVirtualKeyboard();
+ 
+     createFloatButton();
+ 
+diff --git a/src/virtualkeyboardentry/floatbuttonmanager.h b/src/virtualkeyboardentry/floatbuttonmanager.h
+index c866dc1..3a9d069 100644
+--- a/src/virtualkeyboardentry/floatbuttonmanager.h
++++ b/src/virtualkeyboardentry/floatbuttonmanager.h
+@@ -44,7 +44,7 @@ class FloatButtonManager : public QObject {
+ 
+ public:
+     FloatButtonManager(
+-        const VirtualKeyboardManager &virtualKeyboardManager,
++        VirtualKeyboardManager &virtualKeyboardManager,
+         const FcitxVirtualKeyboardService &fcitxVirtualKeyboardService,
+         LocalSettings &floatButtonSettings, ThemeWatcher &themeWatcher);
+     ~FloatButtonManager() override = default;
+@@ -85,7 +85,7 @@ private:
+ private:
+     bool floatButtonEnabled_ = false;
+ 
+-    const VirtualKeyboardManager &virtualKeyboardManager_;
++    VirtualKeyboardManager &virtualKeyboardManager_;
+     const FcitxVirtualKeyboardService &fcitxVirtualKeyboardService_;
+ 
+     LocalSettings &floatButtonSettings_;
+diff --git a/src/virtualkeyboardentry/virtualkeyboardtrayicon.cpp b/src/virtualkeyboardentry/virtualkeyboardtrayicon.cpp
+index 85e90c1..75f793a 100644
+--- a/src/virtualkeyboardentry/virtualkeyboardtrayicon.cpp
++++ b/src/virtualkeyboardentry/virtualkeyboardtrayicon.cpp
+@@ -50,7 +50,7 @@ void VirtualKeyboardTrayIcon::hideContextMenu() {
+ 
+ void VirtualKeyboardTrayIcon::toggleVirtualKeyboard() {
+     if (virtualKeyboardManager_.isVirtualKeyboardVisible()) {
+-        fcitxVirtualKeyboardService_.hideVirtualKeyboard();
++        virtualKeyboardManager_.hideVirtualKeyboard();
+     } else {
+         fcitxVirtualKeyboardService_.showVirtualKeyboard();
+     }

@@ -30,6 +30,8 @@ stdenv.mkDerivation (finalAttrs: {
     ./patches/native-wayland-launch.patch
     ./patches/wayland-layer-shell.patch
     ./patches/wayland-layer-position.patch
+    ./patches/drag-and-startup.patch
+    ./patches/visibility-actions.patch
   ];
 
   nativeBuildInputs = [
@@ -55,36 +57,6 @@ stdenv.mkDerivation (finalAttrs: {
   postPatch = ''
     substituteInPlace data/CMakeLists.txt \
       --replace-fail "/etc/xdg/autostart" "${placeholder "out"}/etc/xdg/autostart"
-
-    # Keep hide requests local to avoid a feedback loop, while show requests
-    # must go through Fcitx so it can activate the on-screen keyboard UI.
-    substituteInPlace src/virtualkeyboardentry/virtualkeyboardtrayicon.cpp \
-      --replace-fail \
-        'fcitxVirtualKeyboardService_.hideVirtualKeyboard();' \
-        'virtualKeyboardManager_.hideVirtualKeyboard();'
-
-    substituteInPlace src/virtualkeyboard/virtualkeyboardmanager.cpp \
-      --replace-fail \
-        'hideVirtualKeyboardCallback_();' \
-        'hideVirtualKeyboard();'
-
-    substituteInPlace src/virtualkeyboardentry/floatbuttonmanager.h \
-      --replace-fail \
-        'const VirtualKeyboardManager &virtualKeyboardManager,' \
-        'VirtualKeyboardManager &virtualKeyboardManager,' \
-      --replace-fail \
-        'const VirtualKeyboardManager &virtualKeyboardManager_;' \
-        'VirtualKeyboardManager &virtualKeyboardManager_;'
-
-    substituteInPlace src/virtualkeyboardentry/floatbuttonmanager.cpp \
-      --replace-fail \
-        'const VirtualKeyboardManager &virtualKeyboardManager,' \
-        'VirtualKeyboardManager &virtualKeyboardManager,'
-
-    substituteInPlace src/virtualkeyboardentry/floatbuttonmanager.cpp \
-      --replace-fail \
-        'fcitxVirtualKeyboardService_.hideVirtualKeyboard();' \
-        'virtualKeyboardManager_.hideVirtualKeyboard();'
 
   '';
 

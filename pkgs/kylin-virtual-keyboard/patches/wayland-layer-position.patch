@@ -1,7 +1,9 @@
 diff --git a/src/virtualkeyboard/virtualkeyboardview.cpp b/src/virtualkeyboard/virtualkeyboardview.cpp
+index b2ca90c..130a07c 100644
 --- a/src/virtualkeyboard/virtualkeyboardview.cpp
 +++ b/src/virtualkeyboard/virtualkeyboardview.cpp
-@@ -128,3 +128,7 @@ void VirtualKeyboardView::move(int x, int y) {
+@@ -130,6 +130,10 @@ void VirtualKeyboardView::move(int x, int y) {
+     KVKBD_DEBUG("position:{},{}", x, y);
      view_->setX(x);
      view_->setY(y);
 +    if (getDesktopType() == DesktopType::WAYLAND) {
@@ -9,3 +11,5 @@ diff --git a/src/virtualkeyboard/virtualkeyboardview.cpp b/src/virtualkeyboard/v
 +            ->setMargins(QMargins(x, y, 0, 0));
 +    }
      emit positionChanged(QPoint(x, y));
+ }
+ 
