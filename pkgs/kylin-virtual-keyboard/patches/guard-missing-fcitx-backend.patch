@@ -1,27 +1,23 @@
 diff --git a/src/virtualkeyboard/virtualkeyboardmodel.cpp b/src/virtualkeyboard/virtualkeyboardmodel.cpp
 --- a/src/virtualkeyboard/virtualkeyboardmodel.cpp
 +++ b/src/virtualkeyboard/virtualkeyboardmodel.cpp
-@@ -20,4 +20,5 @@
- #include <QDBusConnection>
-+#include <QDBusConnectionInterface>
- #include <QDBusMetaType>
- #include <QDBusPendingReply>
- #include "log.h"
-@@ -35,5 +35,9 @@ void VirtualKeyboardModel::updateCandidateArea(
+@@ -35,5 +35,10 @@ void VirtualKeyboardModel::updateCandidateArea(
  }
  
  void VirtualKeyboardModel::selectCandidate(int index) {
-+    if (virtualKeyboardBackendInterface_ == nullptr) {
++    if (virtualKeyboardBackendInterface_ == nullptr ||
++        !virtualKeyboardBackendInterface_->isValid()) {
 +        KVKBD_WARN("virtual keyboard backend is unavailable, cannot select candidate");
 +        return;
 +    }
      virtualKeyboardBackendInterface_->asyncCall("SelectCandidate", index);
  }
-@@ -47,5 +47,9 @@ void VirtualKeyboardModel::processKeyEvent(int keysym, int keycode, int state,
+@@ -47,5 +47,10 @@ void VirtualKeyboardModel::processKeyEvent(int keysym, int keycode, int state,
          return;
      }
  
-+    if (virtualKeyboardBackendInterface_ == nullptr) {
++    if (virtualKeyboardBackendInterface_ == nullptr ||
++        !virtualKeyboardBackendInterface_->isValid()) {
 +        KVKBD_WARN("virtual keyboard backend is unavailable, ignoring key event");
 +        return;
 +    }
@@ -32,9 +28,9 @@ diff --git a/src/virtualkeyboard/virtualkeyboardmodel.cpp b/src/virtualkeyboard/
      connect(serviceWatcher_.get(), SIGNAL(serviceUnregistered(const QString &)),
              this, SLOT(backendServiceUnregistered(const QString &)));
 +
-+    // Fcitx5 commonly starts before the keyboard GUI, so no registration signal
-+    // is emitted after the watcher is installed.
-+    if (QDBusConnection::sessionBus().interface()->isServiceRegistered(
-+            virtualKeyboardBackendService)) {
++    // Create the proxy immediately when Fcitx5 is already running. The watcher
++    // below recreates it when Fcitx5 starts later.
++    initVirtualKeyboardBackendInterface();
++    if (virtualKeyboardBackendInterface_->isValid()) {
 +        backendServiceRegistered(virtualKeyboardBackendService);
 +    }
