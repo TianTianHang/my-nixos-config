@@ -6,10 +6,12 @@
     "https://mirror.sjtu.edu.cn/nix-channels/store"
     "https://cache.nixos.org"
     "https://noctalia.cachix.org"
+    "https://denial.cachix.org"
   ];
   nix.settings.trusted-public-keys = [
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+    "denial.cachix.org-1:wd8YTnvPmugFrtdMJWtR1XdVknR3/g2nmBJkT+vAruo="
   ];
   nix.settings.trusted-users = [ "root" "nixremote" "tiantian" ];
 

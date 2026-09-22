@@ -1,8 +1,14 @@
 {
   description = "Modular NixOS configuration for vivobook";
 
-  # 注意：不使用 nixConfig 声明缓存（非信任用户会收到 ignored 警告），
-  # 全部缓存在 modules/nix.nix 中以系统级 nix.settings 配置
+  nixConfig = {
+    extra-substituters = [ "https://denial.cachix.org" ];
+    extra-trusted-public-keys = [
+      "denial.cachix.org-1:wd8YTnvPmugFrtdMJWtR1XdVknR3/g2nmBJkT+vAruo="
+    ];
+  };
+
+  # 系统级缓存配置仍在 modules/nix.nix 中声明，保证重建时也能使用该缓存。
 
   inputs = {
     # 使用南京大学 Git 镜像加速 nixpkgs 源码下载
@@ -23,6 +29,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    denial.url = "github:denialwm/denial";
+
   };
 
   outputs = {
@@ -30,7 +38,8 @@
     nixpkgs,
     home-manager,
     noctalia,
-    noctalia-greeter
+    noctalia-greeter,
+    denial
   }: let
     system = "x86_64-linux";
     pkgs = import nixpkgs {inherit system;};
@@ -51,16 +60,19 @@
       modules = [
         ./hosts/vivobook
         home-manager.nixosModules.home-manager
-        {
+        ({config, ...}: {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          # 全局注入 noctalia 的 Home Manager 模块，供 home/tiantian 中
-          # 的 programs.noctalia 声明式设置使用
-          home-manager.sharedModules = [noctalia.homeModules.default];
+          # 只在 Niri 模块启用时提供 Noctalia 的 Home Manager 选项。
+          # 这样 Denial 或其他桌面不会加载 Niri 专属的 shell 配置。
+          home-manager.sharedModules = nixpkgs.lib.mkIf config.desktop.niri.enable [
+            noctalia.homeModules.default
+          ];
           home-manager.users.tiantian = import ./home/tiantian;
-        }
+        })
         noctalia.nixosModules.default
         noctalia-greeter.nixosModules.default
+        denial.nixosModules.default
       ];
     };
   };

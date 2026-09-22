@@ -10,8 +10,6 @@
     ./packages.nix
     ./git.nix
     ./bash.nix
-    ./niri.nix
-    ./noctalia.nix
     ./portals.nix
   ];
 }
