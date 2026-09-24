@@ -11,8 +11,8 @@ in {
     hardware.sensor.iio.enable = true;
 
     # Denial 默认启动桌面 shell；当前设备使用移动/触屏 shell。
-    environment.etc."denial/session.conf".text = ''
-      DENIAL_SHELL_PROFILE=mobile
-    '';
+   # environment.etc."denial/session.conf".text = ''
+   #   DENIAL_SHELL_PROFILE=mobile-shell
+   # '';
   };
 }

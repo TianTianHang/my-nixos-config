@@ -1,15 +1,6 @@
 {
   description = "Modular NixOS configuration for vivobook";
 
-  nixConfig = {
-    extra-substituters = [ "https://denial.cachix.org" ];
-    extra-trusted-public-keys = [
-      "denial.cachix.org-1:wd8YTnvPmugFrtdMJWtR1XdVknR3/g2nmBJkT+vAruo="
-    ];
-  };
-
-  # 系统级缓存配置仍在 modules/nix.nix 中声明，保证重建时也能使用该缓存。
-
   inputs = {
     # 使用南京大学 Git 镜像加速 nixpkgs 源码下载
     nixpkgs.url = "git+https://mirror.nju.edu.cn/git/nixpkgs.git?ref=nixos-unstable&shallow=1";
