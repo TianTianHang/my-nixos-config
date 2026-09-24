@@ -37,6 +37,7 @@
     # 自定义包覆盖
     overlay = final: prev: {
       kylin-virtual-keyboard = final.callPackage ./pkgs/kylin-virtual-keyboard/package.nix {};
+      droidloom = final.callPackage ./pkgs/droidloom/package.nix {};
     };
     pkgsWithOverlay = import nixpkgs {
       inherit system;
@@ -44,6 +45,7 @@
     };
   in {
     packages.x86_64-linux.kylin-virtual-keyboard = pkgsWithOverlay.kylin-virtual-keyboard;
+    packages.x86_64-linux.droidloom = pkgsWithOverlay.droidloom;
 
     nixosConfigurations.vivobook = nixpkgs.lib.nixosSystem {
       inherit system;

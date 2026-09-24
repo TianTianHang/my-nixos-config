@@ -2,8 +2,8 @@
   programs.ghostty.enable = true;
 
   programs.ghostty.settings = {
-    theme = "catppuccin-mocha";
-    background-opacity = 0.8;
+    theme = "TokyoNight Storm";
+    background-opacity = 0.92;
     background-blur = true;
   };
 }
