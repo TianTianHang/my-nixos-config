@@ -9,6 +9,8 @@
 
   programs.firefox.enable = true;
 
+  services.upower.enable = true;
+
   # home-manager xdg.portal 要求，用于链接 portal 与桌面应用定义
   environment.pathsToLink = [
     "/share/applications"
