@@ -42,6 +42,10 @@
     pkgsWithOverlay = import nixpkgs {
       inherit system;
       overlays = [overlay];
+      config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
+        "nvidia-settings"
+        "nvidia-x11"
+      ];
     };
   in {
     packages.x86_64-linux.kylin-virtual-keyboard = pkgsWithOverlay.kylin-virtual-keyboard;
@@ -71,6 +75,7 @@
       };
     in {
       vivobook = mkX86Host ./hosts/vivobook;
+      kuangshi = mkX86Host ./hosts/kuangshi;
     };
   };
 }

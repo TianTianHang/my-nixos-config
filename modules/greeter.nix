@@ -9,7 +9,7 @@
     # noctalia-greeter 登录界面（greetd）。
     # 模块默认：启用 greetd、accounts-daemon（用户头像）与 polkit，
     # 并将 greetd default_session 指向 noctalia-greeter-session
-    programs.noctalia-greeter = {
+    services.displayManager.noctalia-greeter = {
       enable = true;
 
       settings = {
