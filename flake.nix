@@ -1,5 +1,5 @@
 {
-  description = "Modular NixOS configuration for vivobook";
+  description = "Shared NixOS configuration for personal x86 devices";
 
   inputs = {
     # 使用南京大学 Git 镜像加速 nixpkgs 源码下载
@@ -47,26 +47,30 @@
     packages.x86_64-linux.kylin-virtual-keyboard = pkgsWithOverlay.kylin-virtual-keyboard;
     packages.x86_64-linux.droidloom = pkgsWithOverlay.droidloom;
 
-    nixosConfigurations.vivobook = nixpkgs.lib.nixosSystem {
-      inherit system;
-      pkgs = pkgsWithOverlay;
-      modules = [
-        ./hosts/vivobook
-        home-manager.nixosModules.home-manager
-        ({config, ...}: {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          # 只在 Niri 模块启用时提供 Noctalia 的 Home Manager 选项。
-          # 这样 Denial 或其他桌面不会加载 Niri 专属的 shell 配置。
-          home-manager.sharedModules = nixpkgs.lib.mkIf config.desktop.niri.enable [
-            noctalia.homeModules.default
-          ];
-          home-manager.users.tiantian = import ./home/tiantian;
-        })
-        noctalia.nixosModules.default
-        noctalia-greeter.nixosModules.default
-        denial.nixosModules.default
-      ];
+    nixosConfigurations = let
+      mkX86Host = host: nixpkgs.lib.nixosSystem {
+        inherit system;
+        pkgs = pkgsWithOverlay;
+        modules = [
+          host
+          home-manager.nixosModules.home-manager
+          ({config, ...}: {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            # 只在 Niri 模块启用时提供 Noctalia 的 Home Manager 选项。
+            # 这样 Denial 或其他桌面不会加载 Niri 专属的 shell 配置。
+            home-manager.sharedModules = nixpkgs.lib.mkIf config.desktop.niri.enable [
+              noctalia.homeModules.default
+            ];
+            home-manager.users.tiantian = import ./home/tiantian;
+          })
+          noctalia.nixosModules.default
+          noctalia-greeter.nixosModules.default
+          denial.nixosModules.default
+        ];
+      };
+    in {
+      vivobook = mkX86Host ./hosts/vivobook;
     };
   };
 }

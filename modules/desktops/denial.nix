@@ -7,6 +7,9 @@ in {
     desktop.greeter.session = lib.mkDefault "Denial";
     programs.denial.enable = true;
 
+    hardware.bluetooth.enable = true;
+    services.blueman.enable = true;
+
     # Denial 使用 IIO 传感器处理设备方向变化。
     hardware.sensor.iio.enable = true;
 
