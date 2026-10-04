@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{lib, pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     ghostty
     nautilus
@@ -7,7 +7,9 @@
     dconf
   ];
 
-  programs.firefox.enable = true;
+  # 默认浏览器。mkDefault 便于主机在 hosts/<host>/default.nix 里覆盖
+  # （例如 kuangshi 换成了 zen-browser）
+  programs.firefox.enable = lib.mkDefault true;
 
   services.upower.enable = true;
 

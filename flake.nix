@@ -22,15 +22,23 @@
 
     denial.url = "github:denialwm/denial";
 
+    # zen 浏览器。nixpkgs 尚未收录（曾因安全问题被移除），
+    # 按 NixOS Wiki 采用 youwen5 的 flake（预编译二进制包装，构建秒级）
+    zen-browser = {
+      url = "github:youwen5/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
-  outputs = {
+  outputs = inputs @ {
     self,
     nixpkgs,
     home-manager,
     noctalia,
     noctalia-greeter,
-    denial
+    denial,
+    ...
   }: let
     system = "x86_64-linux";
     pkgs = import nixpkgs {inherit system;};
@@ -55,6 +63,8 @@
       mkX86Host = host: nixpkgs.lib.nixosSystem {
         inherit system;
         pkgs = pkgsWithOverlay;
+        # 让主机/模块文件能通过 { inputs, ... } 拿到 flake 输入
+        specialArgs = {inherit inputs;};
         modules = [
           host
           home-manager.nixosModules.home-manager
