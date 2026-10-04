@@ -2,12 +2,20 @@
   imports = [
     ../common.nix
     ./hardware-configuration.nix
+    # AAGL 游戏启动器模块（Cachix 缓存配置在 modules/nix.nix）
+    inputs.aagl.nixosModules.default
   ];
 
   networking.hostName = "kuangshi";
 
   desktop.denial.enable = false;
   desktop.niri.enable = true;
+
+  # AAGL 游戏启动器（按需开关，不需要的删掉对应行即可）
+  programs.anime-game-launcher.enable = true; # 原神
+  programs.anime-games-launcher.enable = true; # 米哈游游戏合集
+  programs.honkers-railway-launcher.enable = true; # 崩坏：星穹铁道
+  programs.sleepy-launcher.enable = true; # 绝区零
 
   # 浏览器用 Zen（覆盖 common 里共享的 firefox 默认值）
   programs.firefox.enable = false;

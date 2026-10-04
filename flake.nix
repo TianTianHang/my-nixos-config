@@ -29,6 +29,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # AAGL：米哈游等游戏启动器集合（含专用 Cachix 缓存），
+    # 目前只在 kuangshi 上启用，见 hosts/kuangshi/default.nix
+    aagl = {
+      url = "github:ezKEa/aagl-gtk-on-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs = inputs @ {
@@ -53,6 +60,11 @@
       config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
         "nvidia-settings"
         "nvidia-x11"
+        # AAGL 游戏启动器依赖的 Steam 组件
+        "steam-unwrapped"
+        "steam"
+        "steam-original"
+        "steamcmd"
       ];
     };
   in {
