@@ -77,7 +77,19 @@
     ip -n ${netnsName} route replace default via ${hostAddr} dev ${vethPeerFinal}
 
     # 6. netns 内需要转发：组网流量进 tunnel，隧道流量出 tunnel
-    ip netns exec ${netnsName} sysctl -qw net.ipv4.ip_forward=1
+    #    必须经 ip netns exec 在 netns 内写：宿主 shell 下的
+    #    /proc/sys/net/ipv4/ip_forward 是宿主自己的那份。
+    #    用 sh 重定向而非 sysctl，省得为这一行在 PATH 里引入 procps
+    ip netns exec ${netnsName} sh -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'
+
+    # 6b. 关掉宿主侧 veth 的反向路径校验。
+    #     NixOS 默认 rp_filter=2（严格模式）：从 enp6s0 进来、源地址是
+    #     192.168.10.1（netns 侧）的包会被判定"源地址不该从这个口进来"而丢弃，
+    #     结果 netns 内出网不通。host sysctl 不会覆盖运行中新建的接口，
+    #     所以必须在这里写。设为 0 即宽松模式。
+    if [ -w /proc/sys/net/ipv4/conf/${vethHost}/rp_filter ]; then
+      echo 0 > /proc/sys/net/ipv4/conf/${vethHost}/rp_filter
+    fi
 
     # 7. 宿主侧到组网网段的显式路由。这些网段只存在于 netns 内，
     #    宿主靠这些静态路由经 veth 访问（含 mihomo 的上游代理）。
@@ -196,11 +208,11 @@ in {
     description = "EasyTier network namespace and veth pair";
     wantedBy = [ "multi-user.target" ];
     before = [ "easytier-default.service" ];
-    # 脚本用到 ip / grep
+    # 脚本用到 ip / grep / sh
     path = [
       pkgs.iproute2
       pkgs.gnugrep
-      pkgs.coreutils
+      pkgs.bashInteractive
     ];
     serviceConfig = {
       Type = "oneshot";
