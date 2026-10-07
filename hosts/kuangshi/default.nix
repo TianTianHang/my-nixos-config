@@ -60,6 +60,10 @@
     };
   };
 
+  # mihomo 透明代理：上游是经组网可达的 192.168.100.254:7890，
+  # 出站靠 routing-mark + modules/easytier.nix 里的 ip rule 走 veth 进组网。
+  networking.mihomo.enable = true;
+
   users.users.tiantian.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILF47iRw0YgSWTbmYgnLMLyDeKXb0POLi80SINgeGl52 nix-builder-key"
   ];

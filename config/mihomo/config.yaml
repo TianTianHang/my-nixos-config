@@ -60,6 +60,18 @@ tun:
   # 与 netns 内 easytier0（MTU 1380）共存，取略小的值避免隧道叠加后分片
   mtu: 1400
 
+  # 排除宿主侧的组网 veth。
+  #
+  # auto-redirect 的 nftables 规则挂在 output/prerouting 链上，会连带劫持
+  # netns 经该 veth 转发出来的流量 —— easytier 的出站隧道连接因此被 mihomo
+  # 截走，组网断掉、上游代理不可达，形成"mihomo 依赖 easytier、easytier 又
+  # 被 mihomo 阻塞"的循环。排除后组网流量直走 veth。
+  #
+  # 接口名须与 modules/easytier.nix 的 vethHost 一致：kuangshi 用 veasy0，
+  # vivobook 用同一名称。若改了一处，另一处也要同步。
+  exclude-interface:
+    - veasy0
+
 # ---------- DNS ----------
 dns:
   enable: true

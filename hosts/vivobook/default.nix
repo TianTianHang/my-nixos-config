@@ -14,12 +14,21 @@
     enable = true;
     linkPrefix = "192.168.11";
     hostLastOctet = 253;
-    # routes 必须按本机实际情况填写：easytier 自身的虚拟网段
-    # （取自 /var/lib/easytier/easytier.toml 的 ipv4=），以及需要经组网
-    # 访问的远端内网段。查当前值：
-    #   sudo ip netns exec easytier ip route show dev easytier0
-    routes = [ ];
+    routes = [
+      # 远端内网：mihomo 的上游代理 192.168.100.254 在此段。
+      # 与 kuangshi 同组网，代理位置相同，两台机器走同一条路径。
+      "192.168.100.0/24"
+      "192.168.9.0/24"
+      # 本机 easytier 自身的虚拟网段（取自
+      # /var/lib/easytier/easytier.toml 的 ipv4=）。kuangshi 是
+      # 10.126.126.0/24，vivobook 的地址需在本机确认后替换。
+      "10.126.126.0/24"
+    ];
   };
+
+  # mihomo 透明代理：上游同样是经组网可达的 192.168.100.254:7890，
+  # 出站靠 routing-mark + modules/easytier.nix 里的 ip rule 走 veth。
+  networking.mihomo.enable = true;
 
   desktop.denial.enable = true;
   desktop.niri.enable = false;
