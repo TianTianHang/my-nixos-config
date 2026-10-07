@@ -8,6 +8,23 @@
 
   networking.hostName = "kuangshi";
 
+  # EasyTier 跑在独立 netns 里，通过这对 veth 与宿主相连。
+  # linkPrefix 是本机 proxy_network 声明导出的段，组网设备靠它访问宿主：
+  # ssh 192.168.10.253 即到本机。绝不能取远端内网段（会占用远端设备地址）。
+  services.easytier.netns = {
+    enable = true;
+    linkPrefix = "192.168.10";
+    hostLastOctet = 253;
+    routes = [
+      # easytier 自身的虚拟网段
+      "10.126.126.0/24"
+      # 远端内网：上游代理 192.168.100.254 在此段。
+      # mihomo 经静态路由 + routing-mark 经 veth 过去（不开 auto-detect）。
+      "192.168.100.0/24"
+      "192.168.9.0/24"
+    ];
+  };
+
   desktop.denial.enable = false;
   desktop.niri.enable = true;
 

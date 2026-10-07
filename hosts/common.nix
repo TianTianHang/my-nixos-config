@@ -9,6 +9,7 @@
     ../modules/greeter.nix
     ../modules/input-method.nix
     ../modules/localization.nix
+    ../modules/mihomo.nix
     ../modules/networking.nix
     ../modules/nix.nix
     ../modules/packages.nix
