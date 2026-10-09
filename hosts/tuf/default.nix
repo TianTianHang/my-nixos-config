@@ -6,7 +6,7 @@
 # CTDP / SxCT 符号缺失。本机同样带 Intel DPTF 表，但日志里没有对应的
 # AE_NOT_FOUND 报错（只有另一类 H_EC.SEN2/SEN4/CHRG 缺失，该模块不覆盖），
 # 引了只会白压一个 ACPI override。
-{...}: {
+{inputs, pkgs, ...}: {
   imports = [
     ./hardware-configuration.nix
 
@@ -45,6 +45,19 @@
   desktop.niri.enable = true;
 
   # 本机尚未加入组网，easytier / mihomo 都不引（见上方 imports 的说明）。
+
+  # 浏览器用 Zen（覆盖 modules/desktop.nix 里的 firefox 默认值）
+  programs.firefox.enable = false;
+  environment.systemPackages = [
+    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+  ];
+
+  # 局域网代理：github.com 直连超时，nix-daemon 需要走代理
+  # 才能拉 flake 输入、下载 FOD 源码包（zen 的 tarball）
+  systemd.services.nix-daemon.environment = {
+    http_proxy = "http://192.168.100.254:7890";
+    https_proxy = "http://192.168.100.254:7890";
+  };
 
   # Intel 驱动内屏，NVIDIA 走 PRIME offload 按需出图。
   # bus ID 取自本机 /sys/class/drm/card*/device 的 PCI_SLOT_NAME：
