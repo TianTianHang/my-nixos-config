@@ -101,6 +101,7 @@
     in {
       vivobook = mkX86Host ./hosts/vivobook;
       kuangshi = mkX86Host ./hosts/kuangshi;
+      tuf = mkX86Host ./hosts/tuf;
     };
   };
 }
