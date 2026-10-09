@@ -29,9 +29,12 @@
 
   networking.hostName = "tuf";
 
-  # 内核沿用共享的 modules/boot.nix（linuxPackages_latest），与其他两台一致。
-  # 注意本机当前跑的是 7.1.9-zen1（旧配置写的 linuxPackages_zen），切换后
-  # 会换成 latest 系的 7.x，NVIDIA 驱动随之重编译匹配。
+  # CachyOS 内核。CPU 是 i5-11400H（Rocket Lake），实测支持 AVX2/BMI2，
+  # 用 x86_64-v3 基线。覆盖 modules/boot.nix 里的 mkDefault。
+  #
+  # 注意本机从 7.1.9-zen1 换到 CachyOS 7.2.x，NVIDIA 驱动会重编译匹配；
+  # systemd-boot 默认保留上一代条目，新内核起不来时可在启动菜单选旧的。
+  boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-x86_64-v3;
 
   # 沿用本机原有设置
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];

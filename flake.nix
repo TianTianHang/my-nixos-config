@@ -36,6 +36,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # CachyOS 内核（含官方 patch 与调优）。用 release 分支：它指向
+    # 作者 CI 已构建的 rev。注意不要覆盖它的 nixpkgs 输入，否则 patch
+    # 与内核版本会错配。二进制缓存在 modules/nix.nix 里手动配置
+    # （cache.xinux.uz 镜像，实测 release 分支的内核在其缓存中）。
+    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
+
   };
 
   outputs = inputs @ {
@@ -45,6 +51,7 @@
     noctalia,
     noctalia-greeter,
     denial,
+    nix-cachyos-kernel,
     ...
   }: let
     system = "x86_64-linux";
@@ -56,7 +63,21 @@
     };
     pkgsWithOverlay = import nixpkgs {
       inherit system;
-      overlays = [overlay];
+      overlays = [
+        overlay
+        # 暴露 pkgs.cachyosKernels.linuxPackages-cachyos-*
+        #
+        # 必须用 pinned 而非 default：pinned 用的是作者构建缓存时锁定的
+        # 那个 nixpkgs revision，内核 store path 与二进制缓存里的一致，
+        # 才能真正命中缓存（default 会用本仓库的 nixpkgs 重新求值，
+        # 得到完全不同的 store path，实测内核会退化成从源码编译）。
+        #
+        # 该 flake 里虽然有 `_module.args.pkgs = lib.mkForce (...)`，
+        # 但它只在把 flake 加进 modules 时才进入模块系统；这里仅做属性
+        # 访问 .overlays.pinned，不会把本仓库的 pkgs / overlay /
+        # allowUnfreePredicate 换掉。
+        inputs.nix-cachyos-kernel.overlays.pinned
+      ];
       config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
         "nvidia-settings"
         "nvidia-x11"

@@ -28,7 +28,7 @@ cat /etc/hostname
 | 桌面 | Niri + Noctalia（`desktop.niri.enable = true`） | Denial（`desktop.denial.enable = true`） | Niri + Noctalia（`desktop.niri.enable = true`） |
 | 浏览器 | Zen（`zen-browser` flake 输入，`programs.firefox.enable = false`） | Firefox（共享模块 `mkDefault true`） | Zen（同 kuangshi，见 `hosts/tuf/default.nix`） |
 | 图形 | NVIDIA 双显卡 offload（Intel + NVIDIA PRIME） | 集显，默认配置 | Intel Iris Xe 驱动内屏 + RTX 3050 PRIME offload |
-| 内核 | `linuxPackages_latest`（共享） | `linuxPackages_latest`（共享） | `linuxPackages_zen`（`mkForce` 覆盖，见下） |
+| 内核 | CachyOS `latest-x86_64-v3` | CachyOS `lts`（N6000 无 AVX2） | CachyOS `latest-x86_64-v3` |
 | 特有模块 | AAGL 游戏启动器 | `modules/acpi-fix.nix` | 无（ACPI bug 与 vivobook 不同，见下） |
 | 组网 | easytier netns + mihomo | easytier netns + mihomo | **均关闭**（尚未加入组网） |
 | sudo | 免密（`wheelNeedsPassword = false`） | 默认（需密码） | 默认（需密码） |
@@ -41,7 +41,7 @@ cat /etc/hostname
 `hosts/tuf/` 的三处特别说明：
 
 - **不引 `modules/acpi-fix.nix`**。那份 SSDT 修的是 Vivobook 固件独有的 `CTDP` / `SxCT` 符号缺失。tuf 同样带 Intel DPTF 表，但本机日志里没有对应的 `AE_NOT_FOUND` 报错（只有另一类 `H_EC.SEN2/SEN4/CHRG` 缺失，该模块不覆盖），引了只是白压一个 ACPI override。
-- **`boot.kernelPackages` 用 `lib.mkForce`**。`modules/boot.nix` 那处是普通赋值（优先级 100），主机侧直接写会报 `defined multiple times`。
+- **`boot.kernelPackages` 主机侧直接普通赋值**。`modules/boot.nix` 那处已改成 `lib.mkDefault`（优先级 1000），所以主机侧不需要 `lib.mkForce`，写了就能覆盖。
 - **不引 `btrfs.nix` / `easytier.nix` / `mihomo.nix`**。tuf 根分区是 ext4，而 `btrfs.nix` 无条件开 `services.btrfs.autoScrub`，NixOS 断言要求至少挂载一个 btrfs 文件系统；tuf 也尚未加入组网（无 `/var/lib/easytier/easytier.toml`）。不引这些模块，根因就被移除，不需要再用 `lib.mkForce false` 去压 `btrfs.nix` 的无条件赋值和 `easytier.nix` 的无条件 `services.easytier.enable`。
 
 ## 目录结构
@@ -108,6 +108,21 @@ nix eval --offline .#nixosConfigurations.$(hostname).config.networking.hostName
 
 - 仓库没有 justfile / makefile，命令以 `nixos-rebuild --flake` 为准。
 - 构建走国内镜像（SJTU/NJU）+ noctalia/denial cachix，`nix.nix` 里已配置 substituters。
+- **CachyOS 内核缓存只能用 `cache.xinux.uz`，不能只靠官方 attic**。实测 `nix-cachyos-kernel` 的 `release` 分支（2025-10 时为 7.2.8）44 个变体在官方 `attic.xuyh0120.win/lantian` 里全部 404，而 `cache.xinux.uz` 命中 35 个（含本仓库用的 `latest-x86_64-v3` 与 `lts`）。官方 attic 保留在 substituters 里当冗余，等它追上后无害。探测某个变体是否在缓存里：
+  ```bash
+  curl -sI https://cache.xinux.uz/$(nix eval --raw .#nixosConfigurations.<host>.config.boot.kernelPackages.kernel.outPath | xargs basename | cut -d- -f1).narinfo
+  ```
+- **`nix.settings.substituters` 要 switch 之后才写进 `/etc/nix/nix.conf`**。所以「首次换 CachyOS 内核」会撞上鸡生蛋：缓存配置还没生效，但 switch 又要靠那个缓存才拉得到内核。绕过办法是 switch 时用 `--option` 临时注入，不必分两步：
+  ```bash
+  sudo nixos-rebuild switch --flake .#tuf \
+    --option substituters "https://cache.xinux.uz https://cache.nixos.org" \
+    --option trusted-public-keys "cache.xinux.uz:BXCrtqejFjWzWEB9YuGB7X2MV4ttBur1N8BkwQRdH+0= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+  ```
+  验证缓存是否真的命中用 `nix build --dry-run` 看「will be built」里还有没有 `linux-cachyos-*` 内核本体（只有 `-modules` / `initrd` / `nvidia-*` 就是命中了）：
+  ```bash
+  nix build --dry-run --builders '' .#nixosConfigurations.<host>.config.system.build.toplevel
+  ```
+- **`nix-cachyos-kernel` 必须用 `overlays.pinned`，不能用 `default`**。`pinned` 用作者构建缓存时锁定的那份 nixpkgs，内核 store path 与缓存里的一致；`default` 会用本仓库的 nixpkgs 重新求值，得到完全不同的 store path，缓存必然 miss、内核从源码编译。`pinned` 之所以安全，是因为这里只做属性访问 `.overlays.pinned`，**没有把该 flake 加进 `modules`** —— 它内部的 `_module.args.pkgs = lib.mkForce (...)` 只在进模块系统时才会替换本仓库的 pkgs，那会连带冲掉 `allowUnfreePredicate`（NVIDIA 的 `nvidia-settings`/`nvidia-x11` 是 unfree）。
 - 改动 `.nix` 后至少对**受影响的三台主机**跑一遍 `nix build`，通过才算完成。
 - 新增的 `.nix` 文件必须先 `git add` 才能被 flake 看到 —— Nix 只读 git 跟踪的文件，未跟踪会报 `Path ... is not tracked by Git`。
 

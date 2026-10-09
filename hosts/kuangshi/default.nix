@@ -24,6 +24,10 @@
 
   networking.hostName = "kuangshi";
 
+  # CachyOS 内核。桌面机长期开着，CPU 支持 AVX2/BMI2，用 x86_64-v3 基线。
+  # 覆盖 modules/boot.nix 里的 mkDefault（v1 基线）。
+  boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-x86_64-v3;
+
   # EasyTier 跑在独立 netns 里，通过这对 veth 与宿主相连。
   # linkPrefix 是本机 proxy_network 声明导出的段，组网设备靠它访问宿主：
   # ssh 192.168.10.253 即到本机。绝不能取远端内网段（会占用远端设备地址）。
