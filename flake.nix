@@ -85,7 +85,10 @@
             home-manager.useUserPackages = true;
             # 只在 Niri 模块启用时提供 Noctalia 的 Home Manager 选项。
             # 这样 Denial 或其他桌面不会加载 Niri 专属的 shell 配置。
-            home-manager.sharedModules = nixpkgs.lib.mkIf config.desktop.niri.enable [
+            # 用 `or false` 兜底：主机只 import 自己需要的模块，所以跑
+            # Denial 的机器上 desktop.niri 这个选项压根不存在（不是 false，
+            # 而是缺失），直接访问会让 mkIf 的条件求值失败。
+            home-manager.sharedModules = nixpkgs.lib.mkIf (config.desktop.niri.enable or false) [
               noctalia.homeModules.default
             ];
             home-manager.users.tiantian = import ./home/tiantian;

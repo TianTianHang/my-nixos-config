@@ -1,9 +1,24 @@
 {inputs, pkgs, ...}: {
   imports = [
-    ../common.nix
     ./hardware-configuration.nix
     # AAGL 游戏启动器模块（Cachix 缓存配置在 modules/nix.nix）
     inputs.aagl.nixosModules.default
+
+    # 本机需要的共享模块。不引 desktops/denial（这台用 Niri）与
+    # waydroid（没有主机启用它）。
+    ../../modules/boot.nix
+    ../../modules/btrfs.nix
+    ../../modules/desktop.nix
+    ../../modules/desktops/niri.nix
+    ../../modules/easytier.nix
+    ../../modules/greeter.nix
+    ../../modules/input-method.nix
+    ../../modules/localization.nix
+    ../../modules/mihomo.nix
+    ../../modules/networking.nix
+    ../../modules/nix.nix
+    ../../modules/packages.nix
+    ../../modules/user.nix
   ];
 
   networking.hostName = "kuangshi";
@@ -25,7 +40,8 @@
     ];
   };
 
-  desktop.denial.enable = false;
+  # 只引了 desktops/niri.nix，desktop.denial 这个选项在本机根本不存在，
+  # 无需（也不能）再显式置 false。
   desktop.niri.enable = true;
 
   # AAGL 游戏启动器（按需开关，不需要的删掉对应行即可）

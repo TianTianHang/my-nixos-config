@@ -1,8 +1,23 @@
 {config, lib, pkgs, ...}: {
   imports = [
-    ../common.nix
     ./hardware-configuration.nix
     ../../modules/acpi-fix.nix
+
+    # 本机需要的共享模块。不引 desktops/niri（这台用 Denial）与
+    # waydroid（没有主机启用它）。
+    ../../modules/boot.nix
+    ../../modules/btrfs.nix
+    ../../modules/desktop.nix
+    ../../modules/desktops/denial.nix
+    ../../modules/easytier.nix
+    ../../modules/greeter.nix
+    ../../modules/input-method.nix
+    ../../modules/localization.nix
+    ../../modules/mihomo.nix
+    ../../modules/networking.nix
+    ../../modules/nix.nix
+    ../../modules/packages.nix
+    ../../modules/user.nix
   ];
 
   networking.hostName = "vivobook";
@@ -30,8 +45,9 @@
   # 出站靠 routing-mark + modules/easytier.nix 里的 ip rule 走 veth。
   networking.mihomo.enable = true;
 
+  # 只引了 desktops/denial.nix，desktop.niri 这个选项在本机根本不存在，
+  # 无需（也不能）再显式置 false。
   desktop.denial.enable = true;
-  desktop.niri.enable = false;
 
   system.stateVersion = "26.05";
 }
