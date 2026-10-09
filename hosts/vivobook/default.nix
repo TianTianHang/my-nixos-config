@@ -23,11 +23,14 @@
 
   networking.hostName = "vivobook";
 
-  # CachyOS LTS 内核。本机 CPU 是 N6000（Gemini Lake Refresh），**不支持
-  # AVX2**，所以不能用 x86_64-v3/v4 档位，只能跑 v1/v2 基线 —— 这里用
-  # 不带微架构后缀的 lts（v1 基线），任何 x86_64 都兼容。老平台用 LTS
-  # 也比 mainline 稳。覆盖 modules/boot.nix 里的 mkDefault。
-  boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts;
+  # CachyOS 内核。CPU 是 N6000（Jasper Lake，Tremont 核心，2021-01）：
+  # **有 BMI2 但没有 AVX/AVX2/FMA** —— 这是 Intel 当年因 Spectre/MDS 禁用
+  # AVX 的结果，连低端 SKU 都跟着砍了执行单元（后来 Gracemont E-core 才
+  # 恢复 AVX2）。所以只能用 x86_64-v2 档，不能用 v3/v4。
+  #
+  # v2 只需 SSE3/SSSE3/SSE4.1/SSE4.2/POPCNT/CX16/LAHF-SAHF，本机都有。
+  # 覆盖 modules/boot.nix 里的 mkDefault。
+  boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-x86_64-v2;
 
   # EasyTier 跑在独立 netns 里，通过这对 veth 与宿主相连。
   # linkPrefix 与 kuangshi 错开：段本身就是组网设备访问该宿主的地址，
