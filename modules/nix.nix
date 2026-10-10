@@ -16,6 +16,10 @@
     # latest-x86_64-v3 与 lts。官方 attic 一并保留，等它追上后是免费冗余。
     "https://attic.xuyh0120.win/lantian"
     "https://cache.xinux.uz"
+    # DeepSeek Harness（dsh）打包。其 flake 的 nixConfig 只在直接
+    # nix build/run 那个 flake 时生效；我们只在 pkgsWithOverlay 里用它的
+    # overlays.default，所以必须在这里显式声明才能命中它的 Cachix。
+    "https://deepseek-harness-nix.cachix.org"
   ];
   nix.settings.trusted-public-keys = [
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
@@ -25,6 +29,7 @@
     # CachyOS 内核缓存（官方 attic + bahrom04 镜像）
     "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
     "cache.xinux.uz:BXCrtqejFjWzWEB9YuGB7X2MV4ttBur1N8BkwQRdH+0="
+    "deepseek-harness-nix.cachix.org-1:5NrkwLN9veNMhiINtU5ZeV4isXFhFsOwn6Ms7J1M+TA="
   ];
   nix.settings.trusted-users = [ "root" "nixremote" "tiantian" ];
 
