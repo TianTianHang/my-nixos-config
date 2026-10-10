@@ -8,6 +8,7 @@
     ../../modules/boot.nix
     ../../modules/btrfs.nix
     ../../modules/desktop.nix
+    ../../modules/dsh.nix
     ../../modules/desktops/denial.nix
     ../../modules/easytier.nix
     ../../modules/flatpak.nix
@@ -58,6 +59,9 @@
   # 只引了 desktops/denial.nix，desktop.niri 这个选项在本机根本不存在，
   # 无需（也不能）再显式置 false。
   desktop.denial.enable = true;
+
+  # DeepSeek Harness 官方 Electron 桌面版
+  programs.dsh.enable = true;
 
   system.stateVersion = "26.05";
 }

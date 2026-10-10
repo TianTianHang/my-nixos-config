@@ -127,6 +127,22 @@ proxy-groups:
     proxies:
       - 上游代理
       - DIRECT
+  # Cachix（二进制缓存）。实测从本网络经上游代理访问
+  # *.cachix.org 会在 TLS ClientHello 之后被 reset（curl 000、nix 报
+  # SSL connect error 35），间歇性成功，nix 会因此直接放弃 substituter
+  # 查询并让构建失败。是否直连有效取决于当时的上游线路，所以做成
+  # select：在 Web UI 里按域名现场切换，不必改配置重连。
+  - name: CACHIX
+    type: select
+    proxies:
+      - 上游代理
+      - DIRECT
+  # opencode.ai 同理：单独一个选择组，与 cachix 互不影响。
+  - name: OPENCODE
+    type: select
+    proxies:
+      - 上游代理
+      - DIRECT
 
 # ---------- 规则 ----------
 # 顺序即优先级：内网/组网直连 → 国内直连 → 其余走代理
@@ -146,6 +162,15 @@ rules:
   - IP-CIDR,224.0.0.0/4,DIRECT,no-resolve
   - IP-CIDR,240.0.0.0/4,DIRECT,no-resolve
   - GEOSITE,private,DIRECT
+  # 国内 nix 镜像显式直连。mirror.sjtu.edu.cn 目前本来就命中
+  # GeoSite/cn 走直连，但那是 geosite 数据库决定的，数据库一更新就可能
+  # 漂移；显式声明把这条链路钉死，不受 geo 数据变动影响。
+  - DOMAIN-SUFFIX,sjtu.edu.cn,DIRECT
+  # 下面两组走各自的 select 组，可在 Web UI（127.0.0.1:9090）里切换
+  # 走代理还是直连。注意只切换"出站"，DNS 仍由
+  # nameserver-policy 的 geolocation-!cn 分支经代理 DoH 解析。
+  - DOMAIN-SUFFIX,cachix.org,CACHIX
+  - DOMAIN-SUFFIX,opencode.ai,OPENCODE
   # 国内直连
   - GEOSITE,cn,DIRECT
   - GEOIP,CN,DIRECT,no-resolve

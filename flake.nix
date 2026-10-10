@@ -36,6 +36,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # DeepSeek Harness 的 Nix 打包（dsh CLI / bundles / 官方 Electron 桌面版）。
+    # 不写 inputs.nixpkgs.follows：我们只在 pkgsWithOverlay 里用它的
+    # overlays.default，overlay 函数本身只依赖 final/prev（即本仓库的
+    # pkgs），它自带的 nixpkgs 输入只服务于它自己的 flake 输出。
+    dsh.url = "github:moraxyc/deepseek-harness.nix";
+
     # CachyOS 内核（含官方 patch 与调优）。用 release 分支：它指向
     # 作者 CI 已构建的 rev。注意不要覆盖它的 nixpkgs 输入，否则 patch
     # 与内核版本会错配。二进制缓存在 modules/nix.nix 里手动配置
@@ -52,6 +58,7 @@
     noctalia-greeter,
     denial,
     nix-cachyos-kernel,
+    dsh,
     ...
   }: let
     system = "x86_64-linux";
@@ -65,6 +72,10 @@
       inherit system;
       overlays = [
         overlay
+        # 暴露 pkgs.dsh.*（dsh CLI、bundles、官方 Electron 桌面版等）。
+        # 这个 overlay 必须在 pkgsWithOverlay 里：flake.nix 把 pkgs 直接传给
+        # nixosSystem，此时 nixpkgs.overlays 会被 NixOS 忽略。
+        inputs.dsh.overlays.default
         # 暴露 pkgs.cachyosKernels.linuxPackages-cachyos-*
         #
         # 必须用 pinned 而非 default：pinned 用的是作者构建缓存时锁定的

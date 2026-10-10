@@ -9,6 +9,7 @@
     ../../modules/boot.nix
     ../../modules/btrfs.nix
     ../../modules/desktop.nix
+    ../../modules/dsh.nix
     ../../modules/desktops/niri.nix
     ../../modules/easytier.nix
     ../../modules/flatpak.nix
@@ -50,6 +51,9 @@
   # 无需（也不能）再显式置 false。
   desktop.niri.enable = true;
 
+  # DeepSeek Harness 官方 Electron 桌面版
+  programs.dsh.enable = true;
+
   # Steam
   desktop.steam.enable = true;
 
@@ -65,11 +69,19 @@
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
-  # 局域网代理：github.com 直连超时，nix-daemon 需要走代理
-  # 才能拉取 flake 输入、下载 FOD 源码包（zen 的 tarball）
+  # nix-daemon 的代理指向**本机 mihomo**（127.0.0.1:7890），不是上游
+  # 192.168.100.254:7890。github.com 直连超时，nix 需要代理才能拉 flake
+  # 输入、下载 FOD 源码包（zen 的 tarball）与二进制缓存。
+  #
+  # 为什么绕一层本机 mihomo：显式代理变量会让 libcurl 直接连上游，**绕过
+  # TUN 与整套规则引擎**，mihomo 日志里完全看不到 nix 的连接。指到
+  # 127.0.0.1:7890 后 nix 流量才进规则引擎，config/mihomo/config.yaml 里的
+  # DOMAIN-SUFFIX,cachix.org,CACHIX / opencode.ai,OPENCODE 两个 select 组
+  # 对 nix 才生效（可在 Web UI 现场切换走代理还是直连）。
+  # 代价是多一跳：本机 mihomo 再拨上游 192.168.100.254:7890。
   systemd.services.nix-daemon.environment = {
-    http_proxy = "http://192.168.100.254:7890";
-    https_proxy = "http://192.168.100.254:7890";
+    http_proxy = "http://127.0.0.1:7890";
+    https_proxy = "http://127.0.0.1:7890";
   };
 
   hardware.graphics.enable = true;

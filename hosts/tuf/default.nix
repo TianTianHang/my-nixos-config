@@ -16,6 +16,7 @@
     # 要求至少有一个 btrfs 文件系统）。不引 waydroid（没有主机启用它）。
     ../../modules/boot.nix
     ../../modules/desktop.nix
+    ../../modules/dsh.nix
     ../../modules/desktops/niri.nix
     ../../modules/flatpak.nix
     ../../modules/greeter.nix
@@ -47,6 +48,9 @@
   # 无需（也不能）再显式置 false。
   desktop.niri.enable = true;
 
+  # DeepSeek Harness 官方 Electron 桌面版
+  programs.dsh.enable = true;
+
   # 本机尚未加入组网，easytier / mihomo 都不引（见上方 imports 的说明）。
 
   # 浏览器用 Zen（覆盖 modules/desktop.nix 里的 firefox 默认值）
@@ -55,11 +59,13 @@
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
-  # 局域网代理：github.com 直连超时，nix-daemon 需要走代理
-  # 才能拉 flake 输入、下载 FOD 源码包（zen 的 tarball）
+  # nix-daemon 的代理指向**本机 mihomo**（127.0.0.1:7890），不是上游
+  # 192.168.100.254:7890。理由见 hosts/kuangshi/default.nix 的同名配置：
+  # 显式代理会绕过 TUN 与规则引擎，mihomo 的 CACHIX / OPENCODE 选择组
+  # 就对 nix 完全无效。
   systemd.services.nix-daemon.environment = {
-    http_proxy = "http://192.168.100.254:7890";
-    https_proxy = "http://192.168.100.254:7890";
+    http_proxy = "http://127.0.0.1:7890";
+    https_proxy = "http://127.0.0.1:7890";
   };
 
   # Intel 驱动内屏，NVIDIA 走 PRIME offload 按需出图。
