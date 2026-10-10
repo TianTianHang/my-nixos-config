@@ -29,7 +29,7 @@ cat /etc/hostname
 | 浏览器 | Zen（`zen-browser` flake 输入，`programs.firefox.enable = false`） | Firefox（共享模块 `mkDefault true`） | Zen（同 kuangshi，见 `hosts/tuf/default.nix`） |
 | 图形 | NVIDIA 双显卡 offload（Intel + NVIDIA PRIME） | 集显，默认配置 | Intel Iris Xe 驱动内屏 + RTX 3050 PRIME offload |
 | 内核 | CachyOS `latest-x86_64-v3` | CachyOS `latest-x86_64-v2`（N6000 无 AVX2，见下） | CachyOS `latest-x86_64-v3` |
-| 特有模块 | AAGL 游戏启动器 | `modules/acpi-fix.nix` | 无（ACPI bug 与 vivobook 不同，见下） |
+| 特有模块 | AAGL 游戏启动器、Steam（`desktop.steam.enable`） | `modules/acpi-fix.nix` | 无（ACPI bug 与 vivobook 不同，见下） |
 | 组网 | easytier netns + mihomo | easytier netns + mihomo | **均关闭**（尚未加入组网） |
 | sudo | 免密（`wheelNeedsPassword = false`） | 默认（需密码） | 默认（需密码） |
 | stateVersion | `26.05` | `26.05` | `26.05` |
@@ -71,11 +71,14 @@ docs/                  # 专题文档
 | `btrfs` `easytier` `mihomo` | ✓ | ✓ | — |
 | `desktops/niri` | ✓ | — | ✓ |
 | `desktops/denial` | — | ✓ | — |
+| `steam` | ✓ | — | — |
 | `waydroid` | — | — | — |
 | `inputs.aagl` | ✓ | — | — |
 | `acpi-fix` | — | ✓ | — |
 
 `waydroid.nix` 三台都不引：模块自身写 `virtualisation.waydroid.enable = false`，而 NixOS 默认即 false，不引等价于不引。
+
+`steam.nix` 只有 kuangshi 引，开关是 `desktop.steam.enable`。它设 `programs.steam.enable`，并把 `gamescope`、`mangohud` 加进 `extraPackages`、开启 `protontricks`。**刻意没有注入 `__NV_PRIME_RENDER_OFFLOAD` / `__GLX_VENDOR_LIBRARY_NAME`** —— kuangshi 是 NVIDIA PRIME offload，跑 Proton 游戏时如果游戏退回集显或报 `glXChooseVisual failed`（nixpkgs#47932），需要再加 `programs.steam.package = pkgs.steam.override { extraEnv = ...; }`。
 
 `flatpak.nix` 三台都引（底座）。它只开 `services.flatpak.enable`，**不装任何应用** —— 本版 nixpkgs 没有 `services.flatpak.packages` 这类声明式安装选项。Zotero 走 Nix 包，在 `home/tiantian/packages.nix`。
 
@@ -134,7 +137,13 @@ nix eval --offline .#nixosConfigurations.$(hostname).config.networking.hostName
 
 - github.com 直连超时的网络里，需要代理 `http://192.168.100.254:7890`：kuangshi 与 tuf 都已在各自 `hosts/<host>/default.nix` 给 `systemd.services.nix-daemon.environment` 配了代理（`sudo nixos-rebuild` 以 root 拉 flake 输入要用它）；命令行里临时拉取可 `export https_proxy=...`。vivobook 未配置，若其网络同样受限需自行添加。
 - **tuf 直连全断**（`mirror.sjtu.edu.cn:443`、`github.com:443` 实测都连不上，只有 `192.168.100.254:7890` 通）。由此两个后果：一是命令行里 eval/build 必须先 `export https_proxy=...`，否则拉不到 flake 输入；二是 `nix.nix` 里的 SJTU substituter 在 tuf 上是纯负担（每次都超时重试），实际生效的只有 `cache.nixos.org`。
-- **`nix.buildMachines` 的远程 builder（`192.168.100.202`）在 tuf 上不可用**：`nix build` 会卡在远程构建上一个 trivial 派生（实测停在 `unit-nix-daemon.service.drv` 四分钟零进展、无报错），本地 `--builders ''` 则瞬间推进。要在 tuf 上验证构建就加 `--builders ''`，或先修好那台机器。
+- **远程 builder（`192.168.100.202`）连不上时会把 `nix build` 卡死，且没有超时兜底**（kuangshi / tuf 都中过招）：
+  - 实测现象：`nix build` 连一个 trivial 派生都推进不了（kuangshi 上实测挂 >10 分钟零输出、无报错；tuf 上是停在 `unit-nix-daemon.service.drv`）。加 `--builders ''` 则 9 秒内build 完。
+  - 诊断手法：`ss -tanp | grep 192.168.100.202`。若看到 **ESTAB 但收不到 SSH banner**（`ssh -vv` 停在 `Connection established.` 之后不再往下走），说明那台机器的 sshd/整机已经半死 —— 不是网络不通。这种状态下 Nix 永远不会放弃。
+  - 根因：Nix 的 ssh builder 直接用 libssh2 内联连接，**不 spawn `ssh`，也没有任何握手/连接超时**。`nix.settings.connect-timeout`（默认 15）只作用于 HTTP 二进制缓存的 curl，对 builder 无效（nixpkgs/nix#7459）；`~/.ssh/config` 的 `ConnectTimeout` 同样无效。2.34.8 还没有后来引入的 `ssh-server-alive-interval` / `-count-max`（NixOS/nix#15620），所以确实没救。
+  - 另外 Nix **每派发一个 derivation 就重试一次**（NixOS/nix#13513），死 builder 会把整个 build 队列拖住。
+  - 结论：这是那台机器的故障，只能修机器或临时绕开，仓库侧没法配超时。绕法：验证构建一律加 `--builders ''`，或把 `modules/nix.nix` 里的 `nix.buildMachines` 暂时注释掉。
+- **`evaluation warning: stdenv.isLinux / isDarwin is deprecated` 来自 kuangshi 的 `sleepy-launcher`，不是本仓库的问题**：该 Rust 包走 `buildRustPackage` 的 aggregated cargoHash 路径，进到 rust-overlay 的 `lib/mk-aggregated.nix:76`，那里写的是 `lib.optionalString stdenv.isLinux ...`，而新版 nixpkgs 在 `pkgs/stdenv/generic/default.nix` 给这批旧别名加了 `lib.warn`。**排查手法：`NIX_ABORT_ON_WARN=1 nix eval --show-trace <表达式>` 会把 warning 变成 abort 并打出完整调用栈**，比逐个包二分快得多。rust-overlay 是 flake 间接输入，只能等上游修；vivobook / tuf 无此警告。
 - 不要提交或泄露 `hardware-configuration.nix` 里的文件系统 UUID 之外的敏感信息；密钥、token 一律不入库。
 - `flake.lock` 的更新要单独、有理由地进行，不要顺手升级依赖。
 - 新增 host 需要同时改三处：`hosts/<name>/`、`flake.nix` 的 `nixosConfigurations`、以及本文档的机器表格。
