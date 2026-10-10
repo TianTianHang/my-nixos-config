@@ -19,6 +19,7 @@
     ../../modules/networking.nix
     ../../modules/nix.nix
     ../../modules/packages.nix
+    ../../modules/steam.nix
     ../../modules/user.nix
   ];
 
@@ -48,6 +49,9 @@
   # 只引了 desktops/niri.nix，desktop.denial 这个选项在本机根本不存在，
   # 无需（也不能）再显式置 false。
   desktop.niri.enable = true;
+
+  # Steam
+  desktop.steam.enable = true;
 
   # AAGL 游戏启动器（按需开关，不需要的删掉对应行即可）
   programs.anime-game-launcher.enable = true; # 原神
