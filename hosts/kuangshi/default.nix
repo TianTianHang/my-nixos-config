@@ -89,6 +89,7 @@
   hardware.nvidia = {
     open = true;
     modesetting.enable = true;
+    powerManagement.enable = true;
     prime = {
       offload.enable = true;
       offload.enableOffloadCmd = true;
