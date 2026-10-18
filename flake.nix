@@ -89,14 +89,27 @@
         # allowUnfreePredicate 换掉。
         inputs.nix-cachyos-kernel.overlays.pinned
       ];
-      config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
-        "nvidia-settings"
-        "nvidia-x11"
-        # AAGL 游戏启动器依赖的 Steam 组件
-        "steam-unwrapped"
-        "steam"
-        "steam-original"
-        "steamcmd"
+      config.allowUnfreePredicate = pkg: let
+        name = nixpkgs.lib.getName pkg;
+      in
+        builtins.elem name [
+          "nvidia-settings"
+          "nvidia-x11"
+          # AAGL 游戏启动器依赖的 Steam 组件
+          "steam-unwrapped"
+          "steam"
+          "steam-original"
+          "steamcmd"
+        ]
+        # Zotero 依赖的 Firefox ESR 二进制被标记为 unfree（firefox license）。
+        # 用前缀匹配，避免每次 ESR 大版本升级都要改这里。
+        || nixpkgs.lib.hasPrefix "firefox-esr-" name;
+
+      # Zotero 自带的 Firefox ESR 被当前 nixpkgs 标记为 insecure，但它是
+      # Zotero 运行必需的依赖。升级 nixpkgs 后版本号会变，届时需要同步
+      # 更新这里（Nix 要求精确匹配），否则构建会再次报错。
+      config.permittedInsecurePackages = [
+        "firefox-esr-140-bin-unwrapped-140.17.0esr"
       ];
     };
   in {
