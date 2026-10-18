@@ -62,6 +62,12 @@
       Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
       Mod+Comma { spawn-sh "noctalia msg settings-toggle"; }
       Alt+Tab { spawn-sh "noctalia msg window-switcher"; }
+      // 剪贴板历史（Noctalia 内置 clipboard 面板）
+      Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
+
+      // 截屏：Print 改为 Noctalia 区域截图（覆盖 niri 默认的交互式截屏）
+      // niri 内置截图仍可用：Ctrl+Print 全屏、Alt+Print 当前窗口
+      Print { spawn-sh "noctalia msg screenshot-region"; }
 
       // 启动终端
       Mod+T { spawn "ghostty"; }
