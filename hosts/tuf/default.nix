@@ -6,7 +6,7 @@
 # CTDP / SxCT 符号缺失。本机同样带 Intel DPTF 表，但日志里没有对应的
 # AE_NOT_FOUND 报错（只有另一类 H_EC.SEN2/SEN4/CHRG 缺失，该模块不覆盖），
 # 引了只会白压一个 ACPI override。
-{inputs, pkgs, ...}: {
+{pkgs, ...}: {
   imports = [
     ./hardware-configuration.nix
 
@@ -26,6 +26,7 @@
     ../../modules/nix.nix
     ../../modules/packages.nix
     ../../modules/user.nix
+    ../../modules/zen-browser.nix
   ];
 
   networking.hostName = "tuf";
@@ -53,11 +54,8 @@
 
   # 本机尚未加入组网，easytier / mihomo 都不引（见上方 imports 的说明）。
 
-  # 浏览器用 Zen（覆盖 modules/desktop.nix 里的 firefox 默认值）
-  programs.firefox.enable = false;
-  environment.systemPackages = [
-    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ];
+  # 浏览器
+  programs.zen-browser.enable = true;
 
   # nix-daemon 的代理指向**本机 mihomo**（127.0.0.1:7890），不是上游
   # 192.168.100.254:7890。理由见 hosts/kuangshi/default.nix 的同名配置：

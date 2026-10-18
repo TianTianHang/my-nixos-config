@@ -20,6 +20,7 @@
     ../../modules/nix.nix
     ../../modules/packages.nix
     ../../modules/user.nix
+    ../../modules/zen-browser.nix
   ];
 
   networking.hostName = "vivobook";
@@ -62,6 +63,9 @@
 
   # DeepSeek Harness 官方 Electron 桌面版
   programs.dsh.enable = true;
+
+  # 浏览器
+  programs.zen-browser.enable = true;
 
   system.stateVersion = "26.05";
 }

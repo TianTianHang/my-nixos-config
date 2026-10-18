@@ -26,7 +26,7 @@ cat /etc/hostname
 | 主机目录 | `hosts/kuangshi/` | `hosts/vivobook/` | `hosts/tuf/` |
 | 机型 | 桌面机 | ASUS Vivobook | ASUS TUF Gaming F15 (FX506HC) |
 | 桌面 | Niri + Noctalia（`desktop.niri.enable = true`） | Denial（`desktop.denial.enable = true`） | Niri + Noctalia（`desktop.niri.enable = true`） |
-| 浏览器 | Zen（`zen-browser` flake 输入，`programs.firefox.enable = false`） | Firefox（共享模块 `mkDefault true`） | Zen（同 kuangshi，见 `hosts/tuf/default.nix`） |
+| 浏览器 | Zen（`programs.zen-browser.enable = true`） | Zen（同上） | Zen（同上） |
 | 图形 | NVIDIA 双显卡 offload（Intel + NVIDIA PRIME） | 集显，默认配置 | Intel Iris Xe 驱动内屏 + RTX 3050 PRIME offload |
 | 内核 | CachyOS `latest-x86_64-v3` | CachyOS `latest-x86_64-v2`（N6000 无 AVX2，见下） | CachyOS `latest-x86_64-v3` |
 | 特有模块 | AAGL 游戏启动器、Steam（`desktop.steam.enable`） | `modules/acpi-fix.nix` | 无（ACPI bug 与 vivobook 不同，见下） |
@@ -67,7 +67,7 @@ docs/                  # 专题文档
 
 | 模块 | kuangshi | vivobook | tuf |
 | --- | --- | --- | --- |
-| `boot` `desktop` `flatpak` `greeter` `input-method` `localization` `networking` `nix` `packages` `user` | ✓ | ✓ | ✓ |
+| `boot` `desktop` `flatpak` `greeter` `input-method` `localization` `networking` `nix` `packages` `user` `zen-browser` | ✓ | ✓ | ✓ |
 | `btrfs` `easytier` `mihomo` | ✓ | ✓ | — |
 | `desktops/niri` | ✓ | — | ✓ |
 | `desktops/denial` | — | ✓ | — |

@@ -22,6 +22,7 @@
     ../../modules/packages.nix
     ../../modules/steam.nix
     ../../modules/user.nix
+    ../../modules/zen-browser.nix
   ];
 
   networking.hostName = "kuangshi";
@@ -63,11 +64,8 @@
   programs.honkers-railway-launcher.enable = true; # 崩坏：星穹铁道
   programs.sleepy-launcher.enable = true; # 绝区零
 
-  # 浏览器用 Zen（覆盖 common 里共享的 firefox 默认值）
-  programs.firefox.enable = false;
-  environment.systemPackages = [
-    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ];
+  # 浏览器
+  programs.zen-browser.enable = true;
 
   # nix-daemon 的代理指向**本机 mihomo**（127.0.0.1:7890），不是上游
   # 192.168.100.254:7890。github.com 直连超时，nix 需要代理才能拉 flake
