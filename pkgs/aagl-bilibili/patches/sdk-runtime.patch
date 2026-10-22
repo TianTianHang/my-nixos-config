@@ -3,7 +3,7 @@
 @@ -2 +2 @@
 -use std::path::{Path, PathBuf};
 +use std::path::{Component, Path, PathBuf};
-@@ -145,3 +145,15 @@
+@@ -145,3 +145,14 @@
 -    std::fs::metadata(bilibili_plugin_path(game_path))
 -        .map(|metadata| metadata.is_file() && metadata.len() > 0)
 -        .unwrap_or(false)
@@ -12,7 +12,6 @@
 +    [
 +        bilibili_plugin_path(game_path),
 +        game_path
-+            .as_ref()
 +            .join(BILIBILI_PLUGIN_FOLDER)
 +            .join("BLPlatform64/PCGamePlatform.exe")
 +    ]
