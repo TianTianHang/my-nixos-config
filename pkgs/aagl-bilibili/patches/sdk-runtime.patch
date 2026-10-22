@@ -1,0 +1,94 @@
+--- a/src/games/genshin/env_emulation.rs
++++ b/src/games/genshin/env_emulation.rs
+@@ -2 +2 @@
+-use std::path::{Path, PathBuf};
++use std::path::{Component, Path, PathBuf};
+@@ -145,3 +145,15 @@
+-    std::fs::metadata(bilibili_plugin_path(game_path))
+-        .map(|metadata| metadata.is_file() && metadata.len() > 0)
+-        .unwrap_or(false)
++    let game_path = game_path.as_ref();
++
++    [
++        bilibili_plugin_path(game_path),
++        game_path
++            .as_ref()
++            .join(BILIBILI_PLUGIN_FOLDER)
++            .join("BLPlatform64/PCGamePlatform.exe")
++    ]
++    .iter()
++    .all(|path| {
++        std::fs::metadata(path)
++            .map(|metadata| metadata.is_file() && metadata.len() > 0)
++            .unwrap_or(false)
++    })
+@@ -221,0 +234,3 @@
++    let mut installed_plugin = false;
++    let mut installed_platform = false;
++
+@@ -225,7 +240,6 @@
+-        let is_plugin = {
+-            let name = entry.name();
+-
+-            name.ends_with(BILIBILI_PLUGIN_ENTRY_SUFFIX)
+-                && name
+-                    .split('/')
+-                    .any(|part| part.starts_with(BILIBILI_PLUGIN_ENTRY_ARCH_PREFIX))
++        let components: Vec<_> = entry.name().split('/').collect();
++        let Some(arch_index) = components
++            .iter()
++            .position(|part| part.starts_with(BILIBILI_PLUGIN_ENTRY_ARCH_PREFIX))
++        else {
++            continue;
+@@ -234 +248,2 @@
+-        if !is_plugin {
++        let relative_components = &components[arch_index + 1..];
++        if relative_components.is_empty() || entry.is_dir() {
+@@ -238,3 +253,8 @@
+-        // Write to a temporary file first to not leave a half-written library
+-        // in the game folder in case of an error
+-        let temp = parent.join("PCGameSDK.dll.part");
++        let relative = relative_components.iter().copied().collect::<PathBuf>();
++        if relative.is_absolute()
++            || relative
++                .components()
++                .any(|component| matches!(component, Component::ParentDir | Component::RootDir | Component::Prefix(_)))
++        {
++            continue;
++        }
+@@ -241,0 +262,12 @@
++        let destination = parent.join(&relative);
++        let destination_parent = destination
++            .parent()
++            .expect("Bilibili plugin destination always has a parent folder");
++        std::fs::create_dir_all(destination_parent)?;
++
++        // Write each file to a temporary path before replacing the destination.
++        let file_name = destination
++            .file_name()
++            .expect("Bilibili plugin archive entries must have file names")
++            .to_string_lossy();
++        let temp = destination_parent.join(format!("{file_name}.part"));
+@@ -243 +274,0 @@
+-
+@@ -245 +275,0 @@
+-
+@@ -247 +276,0 @@
+-
+@@ -249 +277,0 @@
+-
+@@ -252,3 +280,2 @@
+-        tracing::info!("Installed Bilibili plugin to {}", destination.to_string_lossy());
+-
+-        return Ok(());
++        installed_plugin |= relative == Path::new("PCGameSDK.dll");
++        installed_platform |= relative == Path::new("BLPlatform64/PCGamePlatform.exe");
+@@ -257 +284,7 @@
+-    anyhow::bail!("PCGameSDK.dll is not found in the Bilibili SDK package")
++    if installed_plugin && installed_platform {
++        tracing::info!("Installed Bilibili SDK runtime to {}", parent.to_string_lossy());
++        Ok(())
++    }
++    else {
++        anyhow::bail!("PCGameSDK.dll or PCGamePlatform.exe is not found in the Bilibili SDK package")
++    }

@@ -18,6 +18,7 @@ let
       patch -d "$cargoDepsCopy" -p1 < ${./patches/aagl-cargo-lock.patch}
       patch -d "$sdk_dir" -p1 < ${./patches/sdk-cargo.patch}
       patch -d "$sdk_dir" -p1 < ${./patches/sdk-env.patch}
+      patch -d "$sdk_dir" -p1 < ${./patches/sdk-runtime.patch}
       patch -d "$sdk_dir" -p1 < ${./patches/sdk-game.patch}
       patch -d "$core_dir" -p1 < ${./patches/core-downloader.patch}
     '';
