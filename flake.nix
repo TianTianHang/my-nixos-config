@@ -72,9 +72,8 @@
       inherit system;
       overlays = [
         overlay
-        # 暴露 pkgs.dsh.*（dsh CLI、bundles、官方 Electron 桌面版等）。
-        # 这个 overlay 必须在 pkgsWithOverlay 里：flake.nix 把 pkgs 直接传给
-        # nixosSystem，此时 nixpkgs.overlays 会被 NixOS 忽略。
+        # dsh 与 CachyOS overlay 作用于所有主机，必须在固定 pkgs 中提供。
+        # 主机专属 overlay 则由对应 host 模块追加，避免被该主机导入的模块覆盖。
         inputs.dsh.overlays.default
         # 暴露 pkgs.cachyosKernels.linuxPackages-cachyos-*
         #

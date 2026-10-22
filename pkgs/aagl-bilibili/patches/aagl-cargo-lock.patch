@@ -1,0 +1,6 @@
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -123,2 +123,3 @@
+  "wincompatlib",
++ "zip",
+ ]

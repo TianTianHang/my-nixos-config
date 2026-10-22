@@ -1,0 +1,19 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -28,6 +28,7 @@
+ wincompatlib = { version = "0.7.7", features = ["dxvk"], optional = true }
+ lazy_static = { version = "1.5.0", optional = true }
+ md-5 = { version = "0.10", features = ["asm"], optional = true }
++zip = { version = "3.0", optional = true }
+
+ [features]
+ genshin = ["anime-game-core/genshin"]
+@@ -46,7 +47,7 @@
+ sessions = []
+
+ # Genshin-specific features
+-environment-emulation = []
++environment-emulation = ["dep:zip"]
+ fps-unlocker = ["dep:md-5"]
+
+ all = [

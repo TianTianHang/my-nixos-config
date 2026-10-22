@@ -25,6 +25,12 @@
     ../../modules/zen-browser.nix
   ];
 
+  # AAGL 模块会先提供官方 overlay；本地 overlay 放在模块配置中，确保
+  # 它在官方包定义之后生效，不会被后置的 AAGL overlay 覆盖。
+  nixpkgs.overlays = [
+    (import ../../pkgs/aagl-bilibili/overlay.nix)
+  ];
+
   networking.hostName = "kuangshi";
 
   # CachyOS 内核。桌面机长期开着，CPU 支持 AVX2/BMI2，用 x86_64-v3 基线。
