@@ -58,15 +58,6 @@
   # 浏览器
   programs.zen-browser.enable = true;
 
-  # nix-daemon 的代理指向**本机 mihomo**（127.0.0.1:7890），不是上游
-  # 192.168.100.254:7890。理由见 hosts/kuangshi/default.nix 的同名配置：
-  # 显式代理会绕过 TUN 与规则引擎，mihomo 的 CACHIX / OPENCODE 选择组
-  # 就对 nix 完全无效。
-  systemd.services.nix-daemon.environment = {
-    http_proxy = "http://127.0.0.1:7890";
-    https_proxy = "http://127.0.0.1:7890";
-  };
-
   # Intel 驱动内屏，NVIDIA 走 PRIME offload 按需出图。
   # bus ID 取自本机 /sys/class/drm/card*/device 的 PCI_SLOT_NAME：
   # NVIDIA 0000:01:00.0，Intel 0000:00:02.0。
