@@ -19,6 +19,7 @@
     ../../modules/dsh.nix
     ../../modules/desktops/niri.nix
     ../../modules/flatpak.nix
+    ../../modules/font.nix
     ../../modules/greeter.nix
     ../../modules/input-method.nix
     ../../modules/localization.nix

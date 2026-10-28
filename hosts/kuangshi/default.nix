@@ -13,6 +13,7 @@
     ../../modules/desktops/niri.nix
     ../../modules/easytier.nix
     ../../modules/flatpak.nix
+    ../../modules/font.nix
     ../../modules/greeter.nix
     ../../modules/input-method.nix
     ../../modules/localization.nix
