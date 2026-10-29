@@ -10,6 +10,7 @@
     ./packages.nix
     ./git.nix
     ./bash.nix
+    ./zsh.nix
     ./ghostty.nix
     ./portals.nix
   ];

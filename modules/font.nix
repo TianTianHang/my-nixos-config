@@ -64,5 +64,9 @@ in {
   fonts.packages = [
     wpsSymbolFonts
     simsun
+    # Nerd Font（Meslo 系列）：powerlevel10k 主题图标（git 分支、箭头等）
+    # 依赖 Nerd Font 补丁字形，缺失时显示为方块；ghostty 的 font-family
+    # 用其中的 "MesloLGS Nerd Font Mono" 等宽子族。
+    pkgs.nerd-fonts.meslo-lg
   ];
 }
