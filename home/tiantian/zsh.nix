@@ -30,13 +30,15 @@
     ];
 
     # initContent 位于 zshrc 末尾，保证 p10k 在 oh-my-zsh 之后加载。
-    # 首次启动 p10k 会进入交互式配置向导，选完样式自动写入 ~/.p10k.zsh。
+    # p10k 样式配置固化在 ./p10k.zsh（向导产出，三台机器共享）。
+    # 想换样式：p10k configure 生成 ~/.p10k.zsh → 拷回 ./p10k.zsh → rebuild。
+    # 不要 source ~/.p10k.zsh：那会重新引入仓库外的游离状态。
     initContent = ''
       # 补全大小写不敏感：foo 能补全出 Foo
       zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
       source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-      [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+      source ${./p10k.zsh}
     '';
   };
 }
